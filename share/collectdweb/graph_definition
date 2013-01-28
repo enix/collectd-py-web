@@ -1,0 +1,2063 @@
+Graph ipt_bytes
+    --vertical-label : "Bits/s"
+    DEF:min_raw={file}:value:MIN
+    DEF:avg_raw={file}:value:AVERAGE
+    DEF:max_raw={file}:value:MAX
+    CDEF:min=min_raw,8,*
+    CDEF:avg=avg_raw,8,*
+    CDEF:max=max_raw,8,*
+    CDEF:mytime=avg_raw,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:avg_sample=avg_raw,UN,0,avg_raw,IF,sample_len,*
+    CDEF:avg_sum=PREV,UN,0,PREV,IF,avg_sample,+
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Bits/s
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last
+    GPRINT:avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph percent
+    --vertical-label : "Percent"
+    DEF:avg={file}:percent:AVERAGE
+    DEF:min={file}:percent:MIN
+    DEF:max={file}:percent:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Percent
+    GPRINT:min:MIN:%5.1lf%% Min,
+    GPRINT:avg:AVERAGE:%5.1lf%% Avg,
+    GPRINT:max:MAX:%5.1lf%% Max,
+    GPRINT:avg:LAST:%5.1lf%% Last\l
+
+MetaGraph vmpage_number
+    --vertical-label : "Pages"
+    --number_format: "%6.2lf"
+    anon_pages: #00e000
+    bounce: #00e0ff
+    dirty: #00e0a0
+    file_pages: #f000f0
+    mapped: #f000a0
+    page_table_pages: #ffb000
+    slab: #0000f0
+    unstable: #0000a0
+    writeback: #ff0000
+
+Graph spam_check
+    DEF:avg={file}:hits:AVERAGE
+    DEF:min={file}:hits:MIN
+    DEF:max={file}:hits:MAX
+    AREA:max#DFB7F7
+    AREA:min#FFFFFF
+    LINE1:avg#A000FF:Count 
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+Graph entropy
+    --vertical-label : "Bits"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Bits
+    GPRINT:min:MIN:%4.0lfbit Min,
+    GPRINT:avg:AVERAGE:%4.0lfbit Avg,
+    GPRINT:max:MAX:%4.0lfbit Max,
+    GPRINT:avg:LAST:%4.0lfbit Last\l
+
+Graph voltage
+    --vertical-label : "Voltage"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Voltage
+    GPRINT:min:MIN:%5.1lf%sV Min,
+    GPRINT:avg:AVERAGE:%5.1lf%sV Avg,
+    GPRINT:max:MAX:%5.1lf%sV Max,
+    GPRINT:avg:LAST:%5.1lf%sV Last\l
+
+Graph disk
+    DEF:rtime_avg={file}:rtime:AVERAGE
+    DEF:rtime_min={file}:rtime:MIN
+    DEF:rtime_max={file}:rtime:MAX
+    DEF:wtime_avg={file}:wtime:AVERAGE
+    DEF:wtime_min={file}:wtime:MIN
+    DEF:wtime_max={file}:wtime:MAX
+    CDEF:rtime_avg_ms=rtime_avg,1000,/
+    CDEF:rtime_min_ms=rtime_min,1000,/
+    CDEF:rtime_max_ms=rtime_max,1000,/
+    CDEF:wtime_avg_ms=wtime_avg,1000,/
+    CDEF:wtime_min_ms=wtime_min,1000,/
+    CDEF:wtime_max_ms=wtime_max,1000,/
+    CDEF:total_avg_ms=rtime_avg_ms,wtime_avg_ms,+
+    CDEF:total_min_ms=rtime_min_ms,wtime_min_ms,+
+    CDEF:total_max_ms=rtime_max_ms,wtime_max_ms,+
+    AREA:total_max_ms#F7B7B7
+    AREA:total_min_ms#FFFFFF
+    LINE1:wtime_avg_ms#00E000:Write
+    GPRINT:wtime_min_ms:MIN:%5.1lf%s Min,
+    GPRINT:wtime_avg_ms:AVERAGE:%5.1lf%s Avg,
+    GPRINT:wtime_max_ms:MAX:%5.1lf%s Max,
+    GPRINT:wtime_avg_ms:LAST:%5.1lf%s Last\l
+    LINE1:rtime_avg_ms#0000FF:Read 
+    GPRINT:rtime_min_ms:MIN:%5.1lf%s Min,
+    GPRINT:rtime_avg_ms:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rtime_max_ms:MAX:%5.1lf%s Max,
+    GPRINT:rtime_avg_ms:LAST:%5.1lf%s Last\l
+    LINE1:total_avg_ms#FF0000:Total
+    GPRINT:total_min_ms:MIN:%5.1lf%s Min,
+    GPRINT:total_avg_ms:AVERAGE:%5.1lf%s Avg,
+    GPRINT:total_max_ms:MAX:%5.1lf%s Max,
+    GPRINT:total_avg_ms:LAST:%5.1lf%s Last\l
+
+Graph current
+    --vertical-label : "Ampere"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Current
+    GPRINT:min:MIN:%5.1lf%sA Min,
+    GPRINT:avg:AVERAGE:%5.1lf%sA Avg,
+    GPRINT:max:MAX:%5.1lf%sA Max,
+    GPRINT:avg:LAST:%5.1lf%sA Last\l
+
+Graph spam_score
+    --vertical-label : "Score"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Score 
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+Graph derive
+    --vertical-label : "Derive"
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    CDEF:mytime=avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:avg_sample=avg,UN,0,avg,IF,sample_len,*
+    CDEF:avg_sum=PREV,UN,0,PREV,IF,avg_sample,+
+    AREA:max#F7B7B7
+    AREA:min#FFFFFF
+    LINE1:avg#FF0000:Derive 
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last
+    GPRINT:avg_sum:LAST:(ca. %5.1lf%s Total)\l
+
+Graph if_rx_errors
+    --vertical-label : "Errors/s"
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    CDEF:mytime=avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:avg_sample=avg,UN,0,avg,IF,sample_len,*
+    CDEF:avg_sum=PREV,UN,0,PREV,IF,avg_sample,+
+    AREA:avg#B7B7F7
+    LINE1:avg#0000FF:Errors/s
+    GPRINT:avg:AVERAGE:%3.1lf%s Avg,
+    GPRINT:max:MAX:%3.1lf%s Max,
+    GPRINT:avg:LAST:%3.1lf%s Last
+    GPRINT:avg_sum:LAST:(ca. %2.0lf%s Total)\l
+
+MetaGraph tcp_connections
+    --vertical-label : "Connections"
+    --number_format: "{'ESTABLISHED': '00e000', 'SYN_RECV': '00e0a0', 'CLOSING': '000000', 'CLOSE_WAIT': '0000a0', 'FIN_WAIT2': 'f000a0', 'FIN_WAIT1': 'f000f0', 'LAST_ACK': '000080', 'TIME_WAIT': 'ffb000', 'CLOSE': '0000f0', 'SYN_SENT': '00e0ff', 'LISTEN': 'ff0000'}"
+    ESTABLISHED: 
+    SYN_SENT: 
+    SYN_RECV: 
+    FIN_WAIT1: 
+    FIN_WAIT2: 
+    TIME_WAIT: 
+    CLOSE: 
+    CLOSE_WAIT: 
+    LAST_ACK: 
+    CLOSING: 
+    LISTEN: 
+
+Graph disk_octets
+    --vertical-label : "Bytes/s"
+    DEF:out_min={file}:write:MIN
+    DEF:out_avg={file}:write:AVERAGE
+    DEF:out_max={file}:write:MAX
+    DEF:inc_min={file}:read:MIN
+    DEF:inc_avg={file}:read:AVERAGE
+    DEF:inc_max={file}:read:MAX
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    CDEF:mytime=out_avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:out_avg_sample=out_avg,UN,0,out_avg,IF,sample_len,*
+    CDEF:out_avg_sum=PREV,UN,0,PREV,IF,out_avg_sample,+
+    CDEF:inc_avg_sample=inc_avg,UN,0,inc_avg,IF,sample_len,*
+    CDEF:inc_avg_sum=PREV,UN,0,PREV,IF,inc_avg_sample,+
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_avg#00E000:Written
+    GPRINT:out_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:out_max:MAX:%5.1lf%s Max,
+    GPRINT:out_avg:LAST:%5.1lf%s Last
+    GPRINT:out_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:inc_avg#0000FF:Read   
+    GPRINT:inc_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:inc_max:MAX:%5.1lf%s Max,
+    GPRINT:inc_avg:LAST:%5.1lf%s Last
+    GPRINT:inc_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph charge
+    --vertical-label : "Ah"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Charge
+    GPRINT:min:MIN:%5.1lf%sAh Min,
+    GPRINT:avg:AVERAGE:%5.1lf%sAh Avg,
+    GPRINT:max:MAX:%5.1lf%sAh Max,
+    GPRINT:avg:LAST:%5.1lf%sAh Last\l
+
+Graph vs_memory
+    DEF:vm_avg={file}:vm:AVERAGE
+    DEF:vm_min={file}:vm:MIN
+    DEF:vm_max={file}:vm:MAX
+    DEF:vml_avg={file}:vml:AVERAGE
+    DEF:vml_min={file}:vml:MIN
+    DEF:vml_max={file}:vml:MAX
+    DEF:rss_avg={file}:rss:AVERAGE
+    DEF:rss_min={file}:rss:MIN
+    DEF:rss_max={file}:rss:MAX
+    DEF:anon_avg={file}:anon:AVERAGE
+    DEF:anon_min={file}:anon:MIN
+    DEF:anon_max={file}:anon:MAX
+    LINE1:vm_avg#F0A000:VM     
+    GPRINT:vm_min:MIN:%5.1lf%s Min,
+    GPRINT:vm_avg:AVERAGE:%5.1lf%s Avg.,
+    GPRINT:vm_max:MAX:%5.1lf%s Avg.,
+    GPRINT:vm_avg:LAST:%5.1lf%s Last\l
+    LINE1:vml_avg#FF0000:Locked 
+    GPRINT:vml_min:MIN:%5.1lf%s Min,
+    GPRINT:vml_avg:AVERAGE:%5.1lf%s Avg.,
+    GPRINT:vml_max:MAX:%5.1lf%s Avg.,
+    GPRINT:vml_avg:LAST:%5.1lf%s Last\l
+    LINE1:rss_avg#00E000:RSS    
+    GPRINT:rss_min:MIN:%5.1lf%s Min,
+    GPRINT:rss_avg:AVERAGE:%5.1lf%s Avg.,
+    GPRINT:rss_max:MAX:%5.1lf%s Avg.,
+    GPRINT:rss_avg:LAST:%5.1lf%s Last\l
+    LINE1:anon_avg#0000FF:Anon.  
+    GPRINT:anon_min:MIN:%5.1lf%s Min,
+    GPRINT:anon_avg:AVERAGE:%5.1lf%s Avg.,
+    GPRINT:anon_max:MAX:%5.1lf%s Avg.,
+    GPRINT:anon_avg:LAST:%5.1lf%s Last\l
+
+MetaGraph swap
+    --vertical-label : "Bytes"
+    --number_format: "%5.1lf"
+    free: #00e000
+    cached: #0000ff
+    reserved: 
+    used: #ff0000
+
+Graph ping_droprate
+    --vertical-label : "Percent"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#F7B7B7
+    AREA:min#FFFFFF
+    LINE2:avg#FF0000:Percent
+    GPRINT:min:MIN:%5.1lf%% Min,
+    GPRINT:avg:AVERAGE:%5.1lf%% Avg,
+    GPRINT:max:MAX:%5.1lf%% Max,
+    GPRINT:avg:LAST:%5.1lf%% Last\l
+
+Graph fanspeed
+    --vertical-label : "RPM"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#DFB7F7
+    AREA:min#FFFFFF
+    LINE1:avg#A000FF:RPM
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+Graph df
+    --lower-limit : "0"
+    --vertical-label : "Percent"
+    DEF:free_avg={file}:free:AVERAGE
+    DEF:free_min={file}:free:MIN
+    DEF:free_max={file}:free:MAX
+    DEF:used_avg={file}:used:AVERAGE
+    DEF:used_min={file}:used:MIN
+    DEF:used_max={file}:used:MAX
+    CDEF:total=free_avg,used_avg,+
+    CDEF:free_pct=100,free_avg,*,total,/
+    CDEF:used_pct=100,used_avg,*,total,/
+    CDEF:free_acc=free_pct,used_pct,+
+    CDEF:used_acc=used_pct
+    AREA:free_acc#B7EFB7
+    AREA:used_acc#F7B7B7
+    LINE1:free_acc#00E000:Free
+    GPRINT:free_min:MIN:%5.1lf%sB Min,
+    GPRINT:free_avg:AVERAGE:%5.1lf%sB Avg,
+    GPRINT:free_max:MAX:%5.1lf%sB Max,
+    GPRINT:free_avg:LAST:%5.1lf%sB Last\l
+    LINE1:used_acc#FF0000:Used
+    GPRINT:used_min:MIN:%5.1lf%sB Min,
+    GPRINT:used_avg:AVERAGE:%5.1lf%sB Avg,
+    GPRINT:used_max:MAX:%5.1lf%sB Max,
+    GPRINT:used_avg:LAST:%5.1lf%sB Last\l
+
+Graph load_percent
+    DEF:avg={file}:percent:AVERAGE
+    DEF:min={file}:percent:MIN
+    DEF:max={file}:percent:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Load
+    GPRINT:min:MIN:%5.1lf%s%% Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s%% Avg,
+    GPRINT:max:MAX:%5.1lf%s%% Max,
+    GPRINT:avg:LAST:%5.1lf%s%% Last\l
+
+MetaGraph if_rx_error
+    --vertical-label : "Errors/s"
+
+Graph disk_ops
+    --vertical-label : "Ops/s"
+    DEF:out_min={file}:write:MIN
+    DEF:out_avg={file}:write:AVERAGE
+    DEF:out_max={file}:write:MAX
+    DEF:inc_min={file}:read:MIN
+    DEF:inc_avg={file}:read:AVERAGE
+    DEF:inc_max={file}:read:MAX
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_avg#00E000:Written
+    GPRINT:out_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:out_max:MAX:%6.2lf Max,
+    GPRINT:out_avg:LAST:%6.2lf Last\l
+    LINE1:inc_avg#0000FF:Read   
+    GPRINT:inc_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:inc_max:MAX:%6.2lf Max,
+    GPRINT:inc_avg:LAST:%6.2lf Last\l
+
+Graph processes
+    DEF:running_avg={file}:running:AVERAGE
+    DEF:running_min={file}:running:MIN
+    DEF:running_max={file}:running:MAX
+    DEF:sleeping_avg={file}:sleeping:AVERAGE
+    DEF:sleeping_min={file}:sleeping:MIN
+    DEF:sleeping_max={file}:sleeping:MAX
+    DEF:zombies_avg={file}:zombies:AVERAGE
+    DEF:zombies_min={file}:zombies:MIN
+    DEF:zombies_max={file}:zombies:MAX
+    DEF:stopped_avg={file}:stopped:AVERAGE
+    DEF:stopped_min={file}:stopped:MIN
+    DEF:stopped_max={file}:stopped:MAX
+    DEF:paging_avg={file}:paging:AVERAGE
+    DEF:paging_min={file}:paging:MIN
+    DEF:paging_max={file}:paging:MAX
+    DEF:blocked_avg={file}:blocked:AVERAGE
+    DEF:blocked_min={file}:blocked:MIN
+    DEF:blocked_max={file}:blocked:MAX
+    CDEF:paging_acc=sleeping_avg,running_avg,stopped_avg,zombies_avg,blocked_avg,paging_avg,+,+,+,+,+
+    CDEF:blocked_acc=sleeping_avg,running_avg,stopped_avg,zombies_avg,blocked_avg,+,+,+,+
+    CDEF:zombies_acc=sleeping_avg,running_avg,stopped_avg,zombies_avg,+,+,+
+    CDEF:stopped_acc=sleeping_avg,running_avg,stopped_avg,+,+
+    CDEF:running_acc=sleeping_avg,running_avg,+
+    CDEF:sleeping_acc=sleeping_avg
+    AREA:paging_acc#F3DFB7
+    AREA:blocked_acc#B7DFF7
+    AREA:zombies_acc#F7B7B7
+    AREA:stopped_acc#DFB7F7
+    AREA:running_acc#B7EFB7
+    AREA:sleeping_acc#B7B7F7
+    LINE1:paging_acc#F0A000:Paging  
+    GPRINT:paging_min:MIN:%5.1lf Min,
+    GPRINT:paging_avg:AVERAGE:%5.1lf Average,
+    GPRINT:paging_max:MAX:%5.1lf Max,
+    GPRINT:paging_avg:LAST:%5.1lf Last\l
+    LINE1:blocked_acc#00A0FF:Blocked 
+    GPRINT:blocked_min:MIN:%5.1lf Min,
+    GPRINT:blocked_avg:AVERAGE:%5.1lf Average,
+    GPRINT:blocked_max:MAX:%5.1lf Max,
+    GPRINT:blocked_avg:LAST:%5.1lf Last\l
+    LINE1:zombies_acc#FF0000:Zombies 
+    GPRINT:zombies_min:MIN:%5.1lf Min,
+    GPRINT:zombies_avg:AVERAGE:%5.1lf Average,
+    GPRINT:zombies_max:MAX:%5.1lf Max,
+    GPRINT:zombies_avg:LAST:%5.1lf Last\l
+    LINE1:stopped_acc#A000FF:Stopped 
+    GPRINT:stopped_min:MIN:%5.1lf Min,
+    GPRINT:stopped_avg:AVERAGE:%5.1lf Average,
+    GPRINT:stopped_max:MAX:%5.1lf Max,
+    GPRINT:stopped_avg:LAST:%5.1lf Last\l
+    LINE1:running_acc#00E000:Running 
+    GPRINT:running_min:MIN:%5.1lf Min,
+    GPRINT:running_avg:AVERAGE:%5.1lf Average,
+    GPRINT:running_max:MAX:%5.1lf Max,
+    GPRINT:running_avg:LAST:%5.1lf Last\l
+    LINE1:sleeping_acc#0000FF:Sleeping
+    GPRINT:sleeping_min:MIN:%5.1lf Min,
+    GPRINT:sleeping_avg:AVERAGE:%5.1lf Average,
+    GPRINT:sleeping_max:MAX:%5.1lf Max,
+    GPRINT:sleeping_avg:LAST:%5.1lf Last\l
+
+Graph virt_cpu_total
+    --units-exponent : "0"
+    --vertical-label : "CPU load (%)"
+    DEF:avg_1={file}:value:AVERAGE
+    DEF:min_1={file}:value:MIN
+    DEF:max_1={file}:value:MAX
+    CDEF:avg=avg_1,10000000,/
+    CDEF:min=min_1,10000000,/
+    CDEF:max=max_1,10000000,/
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Percent
+    GPRINT:min:MIN:%6.2lf%% Min,
+    GPRINT:avg:AVERAGE:%6.2lf%% Avg,
+    GPRINT:max:MAX:%6.2lf%% Max,
+    GPRINT:avg:LAST:%6.2lf%% Last\l
+
+Graph humidity
+    --vertical-label : "Percent"
+    DEF:temp_avg={file}:value:AVERAGE
+    DEF:temp_min={file}:value:MIN
+    DEF:temp_max={file}:value:MAX
+    AREA:temp_max#B7EFB7
+    AREA:temp_min#FFFFFF
+    LINE1:temp_avg#00E000:Humidity
+    GPRINT:temp_min:MIN:%4.1lf%% Min,
+    GPRINT:temp_avg:AVERAGE:%4.1lf%% Avg,
+    GPRINT:temp_max:MAX:%4.1lf%% Max,
+    GPRINT:temp_avg:LAST:%4.1lf%% Last\l
+
+Graph gauge
+    --vertical-label : "Exec value"
+    DEF:temp_avg={file}:value:AVERAGE
+    DEF:temp_min={file}:value:MIN
+    DEF:temp_max={file}:value:MAX
+    AREA:temp_max#B7B7F7
+    AREA:temp_min#FFFFFF
+    LINE1:temp_avg#0000FF:Exec value
+    GPRINT:temp_min:MIN:%6.2lf Min,
+    GPRINT:temp_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:temp_max:MAX:%6.2lf Max,
+    GPRINT:temp_avg:LAST:%6.2lf Last\l
+
+Graph ps_rss
+    --vertical-label : "Bytes"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:avg#B7B7F7
+    LINE1:avg#0000FF:RSS
+    GPRINT:min:MIN:%5.1lf%s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last\l
+
+Graph ps_cputime
+    --vertical-label : "Jiffies"
+    DEF:user_avg_raw={file}:user:AVERAGE
+    DEF:user_min_raw={file}:user:MIN
+    DEF:user_max_raw={file}:user:MAX
+    DEF:syst_avg_raw={file}:syst:AVERAGE
+    DEF:syst_min_raw={file}:syst:MIN
+    DEF:syst_max_raw={file}:syst:MAX
+    CDEF:user_avg=user_avg_raw,1000000,/
+    CDEF:user_min=user_min_raw,1000000,/
+    CDEF:user_max=user_max_raw,1000000,/
+    CDEF:syst_avg=syst_avg_raw,1000000,/
+    CDEF:syst_min=syst_min_raw,1000000,/
+    CDEF:syst_max=syst_max_raw,1000000,/
+    CDEF:user_syst=syst_avg,UN,0,syst_avg,IF,user_avg,+
+    AREA:user_syst#B7B7F7
+    AREA:syst_avg#F7B7B7
+    LINE1:user_syst#0000FF:User  
+    GPRINT:user_min:MIN:%5.1lf%s Min,
+    GPRINT:user_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:user_max:MAX:%5.1lf%s Max,
+    GPRINT:user_avg:LAST:%5.1lf%s Last\l
+    LINE1:syst_avg#FF0000:System
+    GPRINT:syst_min:MIN:%5.1lf%s Min,
+    GPRINT:syst_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:syst_max:MAX:%5.1lf%s Max,
+    GPRINT:syst_avg:LAST:%5.1lf%s Last\l
+
+MetaGraph mysql_commands
+    --number_format: "%5.2lf"
+
+Graph connections
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Connections/s
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph frequency
+    --vertical-label : "Hertz"
+    DEF:avg={file}:frequency:AVERAGE
+    DEF:min={file}:frequency:MIN
+    DEF:max={file}:frequency:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Frequency [Hz]
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+Graph vs_processes
+    DEF:proc_avg={file}:total:AVERAGE
+    DEF:proc_min={file}:total:MIN
+    DEF:proc_max={file}:total:MAX
+    AREA:proc_max#B7B7F7
+    AREA:proc_min#FFFFFF
+    LINE1:proc_avg#0000FF:Processes
+    GPRINT:proc_min:MIN:%4.1lf Min,
+    GPRINT:proc_avg:AVERAGE:%4.1lf Avg.,
+    GPRINT:proc_max:MAX:%4.1lf Max,
+    GPRINT:proc_avg:LAST:%4.1lf Last\l
+
+Graph irq
+    --vertical-label : "Issues/s"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Issues/s
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last\l
+
+Graph old_swap
+    DEF:used_avg={file}:used:AVERAGE
+    DEF:used_min={file}:used:MIN
+    DEF:used_max={file}:used:MAX
+    DEF:free_avg={file}:free:AVERAGE
+    DEF:free_min={file}:free:MIN
+    DEF:free_max={file}:free:MAX
+    DEF:cach_avg={file}:cached:AVERAGE
+    DEF:cach_min={file}:cached:MIN
+    DEF:cach_max={file}:cached:MAX
+    DEF:resv_avg={file}:resv:AVERAGE
+    DEF:resv_min={file}:resv:MIN
+    DEF:resv_max={file}:resv:MAX
+    CDEF:cach_avg_notnull=cach_avg,UN,0,cach_avg,IF
+    CDEF:resv_avg_notnull=resv_avg,UN,0,resv_avg,IF
+    CDEF:used_acc=used_avg
+    CDEF:resv_acc=used_acc,resv_avg_notnull,+
+    CDEF:cach_acc=resv_acc,cach_avg_notnull,+
+    CDEF:free_acc=cach_acc,free_avg,+
+    AREA:free_acc#B7EFB7
+    AREA:cach_acc#B7B7F7
+    AREA:resv_acc#F3DFB7
+    AREA:used_acc#F7B7B7
+    LINE1:free_acc#00E000:Free    
+    GPRINT:free_min:MIN:%5.1lf%s Min,
+    GPRINT:free_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:free_max:MAX:%5.1lf%s Max,
+    GPRINT:free_avg:LAST:%5.1lf%s Last\l
+    LINE1:cach_acc#0000FF:Cached  
+    GPRINT:cach_min:MIN:%5.1lf%s Min,
+    GPRINT:cach_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:cach_max:MAX:%5.1lf%s Max,
+    GPRINT:cach_avg:LAST:%5.1lf%s Last\l
+    LINE1:resv_acc#F0A000:Reserved
+    GPRINT:resv_min:MIN:%5.1lf%s Min,
+    GPRINT:resv_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:resv_max:MAX:%5.1lf%s Max,
+    GPRINT:resv_avg:LAST:%5.1lf%s Last\l
+    LINE1:used_acc#FF0000:Used    
+    GPRINT:used_min:MIN:%5.1lf%s Min,
+    GPRINT:used_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:used_max:MAX:%5.1lf%s Max,
+    GPRINT:used_avg:LAST:%5.1lf%s Last\l
+
+Graph fork_rate
+    --vertical-label : "Forks/s"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Forks/s
+    GPRINT:min:MIN:%5.1lf%s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Average,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last\l
+
+Graph mysql_octets
+    --vertical-label : "Bits/s"
+    DEF:out_min={file}:tx:MIN
+    DEF:out_avg={file}:tx:AVERAGE
+    DEF:out_max={file}:tx:MAX
+    DEF:inc_min={file}:rx:MIN
+    DEF:inc_avg={file}:rx:AVERAGE
+    DEF:inc_max={file}:rx:MAX
+    CDEF:mytime=out_avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:out_avg_sample=out_avg,UN,0,out_avg,IF,sample_len,*
+    CDEF:out_avg_sum=PREV,UN,0,PREV,IF,out_avg_sample,+
+    CDEF:inc_avg_sample=inc_avg,UN,0,inc_avg,IF,sample_len,*
+    CDEF:inc_avg_sum=PREV,UN,0,PREV,IF,inc_avg_sample,+
+    CDEF:out_bit_min=out_min,8,*
+    CDEF:out_bit_avg=out_avg,8,*
+    CDEF:out_bit_max=out_max,8,*
+    CDEF:inc_bit_min=inc_min,8,*
+    CDEF:inc_bit_avg=inc_avg,8,*
+    CDEF:inc_bit_max=inc_max,8,*
+    CDEF:overlap=out_bit_avg,inc_bit_avg,GT,inc_bit_avg,out_bit_avg,IF
+    AREA:out_bit_avg#B7EFB7
+    AREA:inc_bit_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_bit_avg#00E000:Written
+    GPRINT:out_bit_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:out_bit_max:MAX:%5.1lf%s Max,
+    GPRINT:out_bit_avg:LAST:%5.1lf%s Last
+    GPRINT:out_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:inc_bit_avg#0000FF:Read   
+    GPRINT:inc_bit_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:inc_bit_max:MAX:%5.1lf%s Max,
+    GPRINT:inc_bit_avg:LAST:%5.1lf%s Last
+    GPRINT:inc_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph rcode
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Queries/s
+    GPRINT:min:MIN:%9.3lf Min,
+    GPRINT:avg:AVERAGE:%9.3lf Average,
+    GPRINT:max:MAX:%9.3lf Max,
+    GPRINT:avg:LAST:%9.3lf Last\l
+
+Graph power
+    --vertical-label : "Watt"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Watt
+    GPRINT:min:MIN:%5.1lf%sW Min,
+    GPRINT:avg:AVERAGE:%5.1lf%sW Avg,
+    GPRINT:max:MAX:%5.1lf%sW Max,
+    GPRINT:avg:LAST:%5.1lf%sW Last\l
+
+Graph cache_result
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Requests/s
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph if_errors
+    --vertical-label : "Errors"
+    DEF:tx_min={file}:tx:MIN
+    DEF:tx_avg={file}:tx:AVERAGE
+    DEF:tx_max={file}:tx:MAX
+    DEF:rx_min={file}:rx:MIN
+    DEF:rx_avg={file}:rx:AVERAGE
+    DEF:rx_max={file}:rx:MAX
+    CDEF:overlap=tx_avg,rx_avg,GT,rx_avg,tx_avg,IF
+    CDEF:mytime=tx_avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:tx_avg_sample=tx_avg,UN,0,tx_avg,IF,sample_len,*
+    CDEF:tx_avg_sum=PREV,UN,0,PREV,IF,tx_avg_sample,+
+    CDEF:rx_avg_sample=rx_avg,UN,0,rx_avg,IF,sample_len,*
+    CDEF:rx_avg_sum=PREV,UN,0,PREV,IF,rx_avg_sample,+
+    AREA:tx_avg#B7EFB7
+    AREA:rx_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:tx_avg#00E000:TX
+    GPRINT:tx_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:tx_max:MAX:%5.1lf%s Max,
+    GPRINT:tx_avg:LAST:%5.1lf%s Last
+    GPRINT:tx_avg_sum:LAST:(ca. %4.0lf%s Total)\l
+    LINE1:rx_avg#0000FF:RX
+    GPRINT:rx_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rx_max:MAX:%5.1lf%s Max,
+    GPRINT:rx_avg:LAST:%5.1lf%s Last
+    GPRINT:rx_avg_sum:LAST:(ca. %4.0lf%s Total)\l
+
+Graph if_packets
+    --vertical-label : "Packets/s"
+    DEF:tx_min={file}:tx:MIN
+    DEF:tx_avg={file}:tx:AVERAGE
+    DEF:tx_max={file}:tx:MAX
+    DEF:rx_min={file}:rx:MIN
+    DEF:rx_avg={file}:rx:AVERAGE
+    DEF:rx_max={file}:rx:MAX
+    CDEF:overlap=tx_avg,rx_avg,GT,rx_avg,tx_avg,IF
+    CDEF:mytime=tx_avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:tx_avg_sample=tx_avg,UN,0,tx_avg,IF,sample_len,*
+    CDEF:tx_avg_sum=PREV,UN,0,PREV,IF,tx_avg_sample,+
+    CDEF:rx_avg_sample=rx_avg,UN,0,rx_avg,IF,sample_len,*
+    CDEF:rx_avg_sum=PREV,UN,0,PREV,IF,rx_avg_sample,+
+    AREA:tx_avg#B7EFB7
+    AREA:rx_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:tx_avg#00E000:TX
+    GPRINT:tx_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:tx_max:MAX:%5.1lf%s Max,
+    GPRINT:tx_avg:LAST:%5.1lf%s Last
+    GPRINT:tx_avg_sum:LAST:(ca. %4.0lf%s Total)\l
+    LINE1:rx_avg#0000FF:RX
+    GPRINT:rx_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rx_max:MAX:%5.1lf%s Max,
+    GPRINT:rx_avg:LAST:%5.1lf%s Last
+    GPRINT:rx_avg_sum:LAST:(ca. %4.0lf%s Total)\l
+
+Graph bitrate
+    --vertical-label : "Bits/s"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Bits/s
+    GPRINT:min:MIN:%5.1lf%s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Average,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last\l
+
+Graph ps_disk_octets
+    --vertical-label : "Bytes/s"
+    DEF:out_min={file}:write:MIN
+    DEF:out_avg={file}:write:AVERAGE
+    DEF:out_max={file}:write:MAX
+    DEF:inc_min={file}:read:MIN
+    DEF:inc_avg={file}:read:AVERAGE
+    DEF:inc_max={file}:read:MAX
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    CDEF:mytime=out_avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:out_avg_sample=out_avg,UN,0,out_avg,IF,sample_len,*
+    CDEF:out_avg_sum=PREV,UN,0,PREV,IF,out_avg_sample,+
+    CDEF:inc_avg_sample=inc_avg,UN,0,inc_avg,IF,sample_len,*
+    CDEF:inc_avg_sum=PREV,UN,0,PREV,IF,inc_avg_sample,+
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_avg#00E000:Written
+    GPRINT:out_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:out_max:MAX:%5.1lf%s Max,
+    GPRINT:out_avg:LAST:%5.1lf%s Last
+    GPRINT:out_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:inc_avg#0000FF:Read   
+    GPRINT:inc_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:inc_max:MAX:%5.1lf%s Max,
+    GPRINT:inc_avg:LAST:%5.1lf%s Last
+    GPRINT:inc_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph nginx_requests
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Requests/s
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph timeleft
+    --vertical-label : "Minutes"
+    DEF:avg={file}:timeleft:AVERAGE
+    DEF:min={file}:timeleft:MIN
+    DEF:max={file}:timeleft:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Time left [min]
+    GPRINT:min:MIN:%5.1lf%s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last\l
+
+Graph nfs3_procedures
+    DEF:null_avg={file}:null:AVERAGE
+    DEF:getattr_avg={file}:getattr:AVERAGE
+    DEF:setattr_avg={file}:setattr:AVERAGE
+    DEF:lookup_avg={file}:lookup:AVERAGE
+    DEF:access_avg={file}:access:AVERAGE
+    DEF:readlink_avg={file}:readlink:AVERAGE
+    DEF:read_avg={file}:read:AVERAGE
+    DEF:write_avg={file}:write:AVERAGE
+    DEF:create_avg={file}:create:AVERAGE
+    DEF:mkdir_avg={file}:mkdir:AVERAGE
+    DEF:symlink_avg={file}:symlink:AVERAGE
+    DEF:mknod_avg={file}:mknod:AVERAGE
+    DEF:remove_avg={file}:remove:AVERAGE
+    DEF:rmdir_avg={file}:rmdir:AVERAGE
+    DEF:rename_avg={file}:rename:AVERAGE
+    DEF:link_avg={file}:link:AVERAGE
+    DEF:readdir_avg={file}:readdir:AVERAGE
+    DEF:readdirplus_avg={file}:readdirplus:AVERAGE
+    DEF:fsstat_avg={file}:fsstat:AVERAGE
+    DEF:fsinfo_avg={file}:fsinfo:AVERAGE
+    DEF:pathconf_avg={file}:pathconf:AVERAGE
+    DEF:commit_avg={file}:commit:AVERAGE
+    DEF:null_max={file}:null:MAX
+    DEF:getattr_max={file}:getattr:MAX
+    DEF:setattr_max={file}:setattr:MAX
+    DEF:lookup_max={file}:lookup:MAX
+    DEF:access_max={file}:access:MAX
+    DEF:readlink_max={file}:readlink:MAX
+    DEF:read_max={file}:read:MAX
+    DEF:write_max={file}:write:MAX
+    DEF:create_max={file}:create:MAX
+    DEF:mkdir_max={file}:mkdir:MAX
+    DEF:symlink_max={file}:symlink:MAX
+    DEF:mknod_max={file}:mknod:MAX
+    DEF:remove_max={file}:remove:MAX
+    DEF:rmdir_max={file}:rmdir:MAX
+    DEF:rename_max={file}:rename:MAX
+    DEF:link_max={file}:link:MAX
+    DEF:readdir_max={file}:readdir:MAX
+    DEF:readdirplus_max={file}:readdirplus:MAX
+    DEF:fsstat_max={file}:fsstat:MAX
+    DEF:fsinfo_max={file}:fsinfo:MAX
+    DEF:pathconf_max={file}:pathconf:MAX
+    DEF:commit_max={file}:commit:MAX
+    CDEF:other_avg=null_avg,readlink_avg,create_avg,mkdir_avg,symlink_avg,mknod_avg,remove_avg,rmdir_avg,rename_avg,link_avg,readdir_avg,readdirplus_avg,fsstat_avg,fsinfo_avg,pathconf_avg,+,+,+,+,+,+,+,+,+,+,+,+,+,+
+    CDEF:other_max=null_max,readlink_max,create_max,mkdir_max,symlink_max,mknod_max,remove_max,rmdir_max,rename_max,link_max,readdir_max,readdirplus_max,fsstat_max,fsinfo_max,pathconf_max,+,+,+,+,+,+,+,+,+,+,+,+,+,+
+    CDEF:stack_read=read_avg
+    CDEF:stack_getattr=stack_read,getattr_avg,+
+    CDEF:stack_access=stack_getattr,access_avg,+
+    CDEF:stack_lookup=stack_access,lookup_avg,+
+    CDEF:stack_write=stack_lookup,write_avg,+
+    CDEF:stack_commit=stack_write,commit_avg,+
+    CDEF:stack_setattr=stack_commit,setattr_avg,+
+    CDEF:stack_other=stack_setattr,other_avg,+
+    AREA:stack_other#F7B7B7
+    AREA:stack_setattr#B7EFB7
+    AREA:stack_commit#F3DFB7
+    AREA:stack_write#B7EFB7
+    AREA:stack_lookup#B7B7F7
+    AREA:stack_access#DFB7F7
+    AREA:stack_getattr#B7DFF7
+    AREA:stack_read#B7B7F7
+    LINE1:stack_other#FF0000:Other  
+    GPRINT:other_max:MAX:%5.1lf Max,
+    GPRINT:other_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:other_avg:LAST:%5.1lf Last\l
+    LINE1:stack_setattr#00E000:setattr
+    GPRINT:setattr_max:MAX:%5.1lf Max,
+    GPRINT:setattr_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:setattr_avg:LAST:%5.1lf Last\l
+    LINE1:stack_commit#F0A000:commit 
+    GPRINT:commit_max:MAX:%5.1lf Max,
+    GPRINT:commit_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:commit_avg:LAST:%5.1lf Last\l
+    LINE1:stack_write#00E000:write  
+    GPRINT:write_max:MAX:%5.1lf Max,
+    GPRINT:write_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:write_avg:LAST:%5.1lf Last\l
+    LINE1:stack_lookup#0000FF:lookup 
+    GPRINT:lookup_max:MAX:%5.1lf Max,
+    GPRINT:lookup_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:lookup_avg:LAST:%5.1lf Last\l
+    LINE1:stack_access#A000FF:access 
+    GPRINT:access_max:MAX:%5.1lf Max,
+    GPRINT:access_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:access_avg:LAST:%5.1lf Last\l
+    LINE1:stack_getattr#00A0FF:getattr
+    GPRINT:getattr_max:MAX:%5.1lf Max,
+    GPRINT:getattr_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:getattr_avg:LAST:%5.1lf Last\l
+    LINE1:stack_read#0000FF:read   
+    GPRINT:read_max:MAX:%5.1lf Max,
+    GPRINT:read_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:read_avg:LAST:%5.1lf Last\l
+
+Graph cpufreq
+    DEF:cpufreq_avg={file}:value:AVERAGE
+    DEF:cpufreq_min={file}:value:MIN
+    DEF:cpufreq_max={file}:value:MAX
+    AREA:cpufreq_max#B7B7F7
+    AREA:cpufreq_min#FFFFFF
+    LINE1:cpufreq_avg#0000FF:Frequency
+    GPRINT:cpufreq_min:MIN:%5.1lf%s Min,
+    GPRINT:cpufreq_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:cpufreq_max:MAX:%5.1lf%s Max,
+    GPRINT:cpufreq_avg:LAST:%5.1lf%s Last\l
+
+Graph opcode
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Queries/s
+    GPRINT:min:MIN:%9.3lf Min,
+    GPRINT:avg:AVERAGE:%9.3lf Average,
+    GPRINT:max:MAX:%9.3lf Max,
+    GPRINT:avg:LAST:%9.3lf Last\l
+
+Graph ps_disk_ops
+    --vertical-label : "Ops/s"
+    DEF:out_min={file}:write:MIN
+    DEF:out_avg={file}:write:AVERAGE
+    DEF:out_max={file}:write:MAX
+    DEF:inc_min={file}:read:MIN
+    DEF:inc_avg={file}:read:AVERAGE
+    DEF:inc_max={file}:read:MAX
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_avg#00E000:Written
+    GPRINT:out_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:out_max:MAX:%6.2lf Max,
+    GPRINT:out_avg:LAST:%6.2lf Last\l
+    LINE1:inc_avg#0000FF:Read   
+    GPRINT:inc_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:inc_max:MAX:%6.2lf Max,
+    GPRINT:inc_avg:LAST:%6.2lf Last\l
+
+Graph apache_idle_workers
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Idle Workers
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph load
+    --vertical-label : "System load"
+    DEF:s_avg={file}:shortterm:AVERAGE
+    DEF:s_min={file}:shortterm:MIN
+    DEF:s_max={file}:shortterm:MAX
+    DEF:m_avg={file}:midterm:AVERAGE
+    DEF:m_min={file}:midterm:MIN
+    DEF:m_max={file}:midterm:MAX
+    DEF:l_avg={file}:longterm:AVERAGE
+    DEF:l_min={file}:longterm:MIN
+    DEF:l_max={file}:longterm:MAX
+    AREA:s_max#B7EFB7
+    AREA:s_min#FFFFFF
+    LINE1:s_avg#00E000: 1m average
+    GPRINT:s_min:MIN:%4.2lf Min,
+    GPRINT:s_avg:AVERAGE:%4.2lf Avg,
+    GPRINT:s_max:MAX:%4.2lf Max,
+    GPRINT:s_avg:LAST:%4.2lf Last\l
+    LINE1:m_avg#0000FF: 5m average
+    GPRINT:m_min:MIN:%4.2lf Min,
+    GPRINT:m_avg:AVERAGE:%4.2lf Avg,
+    GPRINT:m_max:MAX:%4.2lf Max,
+    GPRINT:m_avg:LAST:%4.2lf Last\l
+    LINE1:l_avg#FF0000:15m average
+    GPRINT:l_min:MIN:%4.2lf Min,
+    GPRINT:l_avg:AVERAGE:%4.2lf Avg,
+    GPRINT:l_max:MAX:%4.2lf Max,
+    GPRINT:l_avg:LAST:%4.2lf Last\l
+
+Graph ipt_packets
+    --vertical-label : "Packets/s"
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Packets/s
+    GPRINT:min:MIN:%5.1lf %s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last\l
+
+MetaGraph dns_qtype
+    --vertical-label : "Queries/s"
+
+Graph if_dropped
+    --vertical-label : "Packets/s"
+    DEF:tx_min={file}:tx:MIN
+    DEF:tx_avg={file}:tx:AVERAGE
+    DEF:tx_max={file}:tx:MAX
+    DEF:rx_min={file}:rx:MIN
+    DEF:rx_avg={file}:rx:AVERAGE
+    DEF:rx_max={file}:rx:MAX
+    CDEF:overlap=tx_avg,rx_avg,GT,rx_avg,tx_avg,IF
+    CDEF:mytime=tx_avg,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:tx_avg_sample=tx_avg,UN,0,tx_avg,IF,sample_len,*
+    CDEF:tx_avg_sum=PREV,UN,0,PREV,IF,tx_avg_sample,+
+    CDEF:rx_avg_sample=rx_avg,UN,0,rx_avg,IF,sample_len,*
+    CDEF:rx_avg_sum=PREV,UN,0,PREV,IF,rx_avg_sample,+
+    AREA:tx_avg#B7EFB7
+    AREA:rx_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:tx_avg#00E000:TX
+    GPRINT:tx_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:tx_max:MAX:%5.1lf%s Max,
+    GPRINT:tx_avg:LAST:%5.1lf%s Last
+    GPRINT:tx_avg_sum:LAST:(ca. %4.0lf%s Total)\l
+    LINE1:rx_avg#0000FF:RX
+    GPRINT:rx_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rx_max:MAX:%5.1lf%s Max,
+    GPRINT:rx_avg:LAST:%5.1lf%s Last
+    GPRINT:rx_avg_sum:LAST:(ca. %4.0lf%s Total)\l
+
+Graph qtype
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Queries/s
+    GPRINT:min:MIN:%9.3lf Min,
+    GPRINT:avg:AVERAGE:%9.3lf Average,
+    GPRINT:max:MAX:%9.3lf Max,
+    GPRINT:avg:LAST:%9.3lf Last\l
+
+Graph temperature
+    --vertical-label : "Celsius"
+    DEF:temp_avg={file}:value:AVERAGE
+    DEF:temp_min={file}:value:MIN
+    DEF:temp_max={file}:value:MAX
+    CDEF:average=temp_avg,0.2,*,PREV,UN,temp_avg,PREV,IF,0.8,*,+
+    AREA:temp_max#F7B7B7
+    AREA:temp_min#FFFFFF
+    LINE1:temp_avg#FF0000:Temperature
+    GPRINT:temp_min:MIN:%4.1lf Min,
+    GPRINT:temp_avg:AVERAGE:%4.1lf Avg,
+    GPRINT:temp_max:MAX:%4.1lf Max,
+    GPRINT:temp_avg:LAST:%4.1lf Last\l
+
+Graph vmpage_faults
+    DEF:minf_avg={file}:minflt:AVERAGE
+    DEF:minf_min={file}:minflt:MIN
+    DEF:minf_max={file}:minflt:MAX
+    DEF:majf_avg={file}:majflt:AVERAGE
+    DEF:majf_min={file}:majflt:MIN
+    DEF:majf_max={file}:majflt:MAX
+    CDEF:overlap=majf_avg,minf_avg,GT,minf_avg,majf_avg,IF
+    AREA:majf_avg#B7EFB7
+    AREA:minf_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:majf_avg#00E000:Major
+    GPRINT:majf_min:MIN:%5.1lf%s Min,
+    GPRINT:majf_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:majf_max:MAX:%5.1lf%s Max,
+    GPRINT:majf_avg:LAST:%5.1lf%s Last\l
+    LINE1:minf_avg#0000FF:Minor
+    GPRINT:minf_min:MIN:%5.1lf%s Min,
+    GPRINT:minf_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:minf_max:MAX:%5.1lf%s Max,
+    GPRINT:minf_avg:LAST:%5.1lf%s Last\l
+
+Graph email_size
+    --vertical-label : "Bytes"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#DFB7F7
+    AREA:min#FFFFFF
+    LINE1:avg#A000FF:Count 
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+MetaGraph memory
+    --base : "1024"
+    --vertical-label : "Bytes"
+    --number_format: "%6.2lf%s"
+    free: #00e000
+    cached: #0000ff
+    buffered: #ffb000
+    used: #ff0000
+
+Graph vmpage_io
+    DEF:rpag_avg={file}:in:AVERAGE
+    DEF:rpag_min={file}:in:MIN
+    DEF:rpag_max={file}:in:MAX
+    DEF:wpag_avg={file}:out:AVERAGE
+    DEF:wpag_min={file}:out:MIN
+    DEF:wpag_max={file}:out:MAX
+    CDEF:overlap=wpag_avg,rpag_avg,GT,rpag_avg,wpag_avg,IF
+    AREA:wpag_avg#B7EFB7
+    AREA:rpag_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:wpag_avg#00E000:OUT
+    GPRINT:wpag_min:MIN:%5.1lf%s Min,
+    GPRINT:wpag_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:wpag_max:MAX:%5.1lf%s Max,
+    GPRINT:wpag_avg:LAST:%5.1lf%s Last\l
+    LINE1:rpag_avg#0000FF:IN 
+    GPRINT:rpag_min:MIN:%5.1lf%s Min,
+    GPRINT:rpag_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rpag_max:MAX:%5.1lf%s Max,
+    GPRINT:rpag_avg:LAST:%5.1lf%s Last\l
+
+Graph apache_requests
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Requests/s
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+MetaGraph df_complex
+    --base : "1024"
+    --vertical-label : "Bytes"
+    --number_format: "%5.1lf%s"
+    free: #00e000
+    used: #ff0000
+    reserved: #0000ff
+
+Graph dns_octets
+    DEF:rsp_min_raw={file}:responses:MIN
+    DEF:rsp_avg_raw={file}:responses:AVERAGE
+    DEF:rsp_max_raw={file}:responses:MAX
+    DEF:qry_min_raw={file}:queries:MIN
+    DEF:qry_avg_raw={file}:queries:AVERAGE
+    DEF:qry_max_raw={file}:queries:MAX
+    CDEF:rsp_min=rsp_min_raw,8,*
+    CDEF:rsp_avg=rsp_avg_raw,8,*
+    CDEF:rsp_max=rsp_max_raw,8,*
+    CDEF:qry_min=qry_min_raw,8,*
+    CDEF:qry_avg=qry_avg_raw,8,*
+    CDEF:qry_max=qry_max_raw,8,*
+    CDEF:overlap=rsp_avg,qry_avg,GT,qry_avg,rsp_avg,IF
+    CDEF:mytime=rsp_avg_raw,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:rsp_avg_sample=rsp_avg_raw,UN,0,rsp_avg_raw,IF,sample_len,*
+    CDEF:rsp_avg_sum=PREV,UN,0,PREV,IF,rsp_avg_sample,+
+    CDEF:qry_avg_sample=qry_avg_raw,UN,0,qry_avg_raw,IF,sample_len,*
+    CDEF:qry_avg_sum=PREV,UN,0,PREV,IF,qry_avg_sample,+
+    AREA:rsp_avg#B7EFB7
+    AREA:qry_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:rsp_avg#00E000:Responses
+    GPRINT:rsp_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rsp_max:MAX:%5.1lf%s Max,
+    GPRINT:rsp_avg:LAST:%5.1lf%s Last
+    GPRINT:rsp_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:qry_avg#0000FF:Queries  
+    GPRINT:qry_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:qry_max:MAX:%5.1lf%s Max,
+    GPRINT:qry_avg:LAST:%5.1lf%s Last
+    GPRINT:qry_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph email_count
+    --vertical-label : "Mails"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#DFB7F7
+    AREA:min#FFFFFF
+    LINE1:avg#A000FF:Count 
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+Graph ps_count
+    --vertical-label : "Processes"
+    DEF:procs_avg={file}:processes:AVERAGE
+    DEF:procs_min={file}:processes:MIN
+    DEF:procs_max={file}:processes:MAX
+    DEF:thrds_avg={file}:threads:AVERAGE
+    DEF:thrds_min={file}:threads:MIN
+    DEF:thrds_max={file}:threads:MAX
+    AREA:thrds_avg#B7B7F7
+    AREA:procs_avg#F7B7B7
+    LINE1:thrds_avg#0000FF:Threads  
+    GPRINT:thrds_min:MIN:%5.1lf Min,
+    GPRINT:thrds_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:thrds_max:MAX:%5.1lf Max,
+    GPRINT:thrds_avg:LAST:%5.1lf Last\l
+    LINE1:procs_avg#FF0000:Processes
+    GPRINT:procs_min:MIN:%5.1lf Min,
+    GPRINT:procs_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:procs_max:MAX:%5.1lf Max,
+    GPRINT:procs_avg:LAST:%5.1lf Last\l
+
+Graph lighttpd
+    DEF:binraw={file}:InOctets:AVERAGE
+    DEF:binmaxraw={file}:InOctets:MAX
+    DEF:binminraw={file}:InOctets:MIN
+    DEF:bout={file}:OutOctets:AVERAGE
+    DEF:boutmax={file}:OutOctets:MAX
+    DEF:boutmin={file}:OutOctets:MIN
+    CDEF:bin=binraw,-1,*
+    CDEF:binmax=binmaxraw,-1,*
+    CDEF:binmin=binminraw,-1,*
+    CDEF:binminmax=binmaxraw,binminraw,-
+    CDEF:boutminmax=boutmax,boutmin,-
+    AREA:binmin#ffffff:
+    STACK:binmax#f00000:
+    LINE1:binmin#a0a0a0:
+    LINE1:binmax#a0a0a0:
+    LINE2:bin#efb71d:incoming
+    GPRINT:bin:MIN:%.2lf
+    GPRINT:bin:AVERAGE:%.2lf
+    GPRINT:bin:MAX:%.2lf
+    AREA:boutmin#ffffff:
+    STACK:boutminmax#00f000:
+    LINE1:boutmin#a0a0a0:
+    LINE1:boutmax#a0a0a0:
+    LINE2:bout#a0a735:outgoing
+    GPRINT:bout:MIN:%.2lf
+    GPRINT:bout:AVERAGE:%.2lf
+    GPRINT:bout:MAX:%.2lf
+
+MetaGraph nfs_procedure
+    --number_format: "%5.1lf"
+
+Graph apache_bytes
+    DEF:min_raw={file}:value:MIN
+    DEF:avg_raw={file}:value:AVERAGE
+    DEF:max_raw={file}:value:MAX
+    CDEF:min=min_raw,8,*
+    CDEF:avg=avg_raw,8,*
+    CDEF:max=max_raw,8,*
+    CDEF:mytime=avg_raw,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:avg_sample=avg_raw,UN,0,avg_raw,IF,sample_len,*
+    CDEF:avg_sum=PREV,UN,0,PREV,IF,avg_sample,+
+    AREA:avg#B7B7F7
+    LINE1:avg#0000FF:Bit/s
+    GPRINT:min:MIN:%5.1lf%s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last
+    GPRINT:avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph hddtemp
+    DEF:temp_avg={file}:value:AVERAGE
+    DEF:temp_min={file}:value:MIN
+    DEF:temp_max={file}:value:MAX
+    AREA:temp_max#F7B7B7
+    AREA:temp_min#FFFFFF
+    LINE1:temp_avg#FF0000:Temperature
+    GPRINT:temp_min:MIN:%4.1lf Min,
+    GPRINT:temp_avg:AVERAGE:%4.1lf Avg,
+    GPRINT:temp_max:MAX:%4.1lf Max,
+    GPRINT:temp_avg:LAST:%4.1lf Last\l
+
+Graph mysql_threads
+    --vertical-label : "Threads"
+    DEF:running_min={file}:running:MIN
+    DEF:running_avg={file}:running:AVERAGE
+    DEF:running_max={file}:running:MAX
+    DEF:connected_min={file}:connected:MIN
+    DEF:connected_avg={file}:connected:AVERAGE
+    DEF:connected_max={file}:connected:MAX
+    DEF:cached_min={file}:cached:MIN
+    DEF:cached_avg={file}:cached:AVERAGE
+    DEF:cached_max={file}:cached:MAX
+    DEF:created_min={file}:created:MIN
+    DEF:created_avg={file}:created:AVERAGE
+    DEF:created_max={file}:created:MAX
+    CDEF:unknown=created_avg,UNKN,+
+    CDEF:cached_agg=connected_avg,cached_avg,+
+    AREA:cached_agg#B7EFB7
+    AREA:connected_avg#B7B7F7
+    AREA:running_avg#F7B7B7
+    LINE1:cached_agg#00E000:Cached   
+    GPRINT:cached_min:MIN:%5.1lf Min,
+    GPRINT:cached_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:cached_max:MAX:%5.1lf Max,
+    GPRINT:cached_avg:LAST:%5.1lf Last\l
+    LINE1:connected_avg#0000FF:Connected
+    GPRINT:connected_min:MIN:%5.1lf Min,
+    GPRINT:connected_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:connected_max:MAX:%5.1lf Max,
+    GPRINT:connected_avg:LAST:%5.1lf Last\l
+    LINE1:running_avg#FF0000:Running  
+    GPRINT:running_min:MIN:%5.1lf Min,
+    GPRINT:running_avg:AVERAGE:%5.1lf Avg,
+    GPRINT:running_max:MAX:%5.1lf Max,
+    GPRINT:running_avg:LAST:%5.1lf Last\l
+    LINE1:unknown#FFFFFF:Created  
+    GPRINT:created_min:MIN:%5.0lf Min,
+    GPRINT:created_avg:AVERAGE:%5.0lf Avg,
+    GPRINT:created_max:MAX:%5.0lf Max,
+    GPRINT:created_avg:LAST:%5.0lf Last\l
+
+Graph pg_scan
+    DEF:pg_scan_avg={file}:value:AVERAGE
+    DEF:pg_scan_min={file}:value:MIN
+    DEF:pg_scan_max={file}:value:MAX
+    AREA:pg_scan_max#B7B7F7
+    AREA:pg_scan_min#FFFFFF
+    LINE1:pg_scan_avg#0000FF:Scans
+    GPRINT:pg_scan_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_scan_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_scan_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_scan_avg:LAST:%4.1lf%s Last
+
+Graph contextswitch
+    DEF:avg={file}:contextswitches:AVERAGE
+    DEF:min={file}:contextswitches:MIN
+    DEF:max={file}:contextswitches:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Switches/s
+    GPRINT:min:MIN:%4.1lf ms Min,
+    GPRINT:avg:AVERAGE:%4.1lf ms Avg,
+    GPRINT:max:MAX:%4.1lf ms Max,
+    GPRINT:avg:LAST:%4.1lf ms Last
+
+Graph mysql_handler
+    --vertical-label : "Issues/s"
+    DEF:val_avg={file}:value:AVERAGE
+    DEF:val_min={file}:value:MIN
+    DEF:val_max={file}:value:MAX
+    AREA:val_max#B7B7F7
+    AREA:val_min#FFFFFF
+    LINE1:val_avg#0000FF:Issues/s
+    GPRINT:val_min:MIN:%5.2lf Min,
+    GPRINT:val_avg:AVERAGE:%5.2lf Avg,
+    GPRINT:val_max:MAX:%5.2lf Max,
+    GPRINT:val_avg:LAST:%5.2lf Last
+
+MetaGraph vmpage_action
+    --vertical-label : "Pages"
+    --number_format: "%6.2lf"
+    activate: #00e000
+    deactivate: #00e0ff
+    alloc: #f000f0
+    free: #00e0a0
+    refill: #f000a0
+    scan_direct: #ffb000
+    scan_kswapd: #0000f0
+    steal: #0000a0
+
+Graph time_offset
+    DEF:s_avg={file}:value:AVERAGE
+    DEF:s_min={file}:value:MIN
+    DEF:s_max={file}:value:MAX
+    AREA:s_max#B7B7F7
+    AREA:s_min#FFFFFF
+    LINE1:s_avg#0000FF:{inst}
+    GPRINT:s_min:MIN:%7.3lf%s Min,
+    GPRINT:s_avg:AVERAGE:%7.3lf%s Avg,
+    GPRINT:s_max:MAX:%7.3lf%s Max,
+    GPRINT:s_avg:LAST:%7.3lf%s Last
+
+Graph frequency_offset
+    DEF:ppm_avg={file}:value:AVERAGE
+    DEF:ppm_min={file}:value:MIN
+    DEF:ppm_max={file}:value:MAX
+    AREA:ppm_max#B7B7F7
+    AREA:ppm_min#FFFFFF
+    LINE1:ppm_avg#0000FF:{inst}
+    GPRINT:ppm_min:MIN:%5.2lf Min,
+    GPRINT:ppm_avg:AVERAGE:%5.2lf Avg,
+    GPRINT:ppm_max:MAX:%5.2lf Max,
+    GPRINT:ppm_avg:LAST:%5.2lf Last
+
+Graph mails
+    DEF:rawgood={file}:good:AVERAGE
+    DEF:rawspam={file}:spam:AVERAGE
+    CDEF:good=rawgood,UN,0,rawgood,IF
+    CDEF:spam=rawspam,UN,0,rawspam,IF
+    CDEF:negspam=spam,-1,*
+    AREA:good#B7EFB7
+    LINE1:good#00E000:Good mails
+    GPRINT:good:AVERAGE:%4.1lf Avg,
+    GPRINT:good:MAX:%4.1lf Max,
+    GPRINT:good:LAST:%4.1lf Last\l
+    AREA:negspam#F7B7B7
+    LINE1:negspam#FF0000:Spam mails
+    GPRINT:spam:AVERAGE:%4.1lf Avg,
+    GPRINT:spam:MAX:%4.1lf Max,
+    GPRINT:spam:LAST:%4.1lf Last\l
+    HRULE:0#000000
+
+Graph apache_scoreboard
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Processes
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph partition
+    DEF:rbyte_avg={file}:rbytes:AVERAGE
+    DEF:rbyte_min={file}:rbytes:MIN
+    DEF:rbyte_max={file}:rbytes:MAX
+    DEF:wbyte_avg={file}:wbytes:AVERAGE
+    DEF:wbyte_min={file}:wbytes:MIN
+    DEF:wbyte_max={file}:wbytes:MAX
+    CDEF:overlap=wbyte_avg,rbyte_avg,GT,rbyte_avg,wbyte_avg,IF
+    AREA:wbyte_avg#B7EFB7
+    AREA:rbyte_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:wbyte_avg#00E000:Write
+    GPRINT:wbyte_min:MIN:%5.1lf%s Min,
+    GPRINT:wbyte_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:wbyte_max:MAX:%5.1lf%s Max,
+    GPRINT:wbyte_avg:LAST:%5.1lf%s Last\l
+    LINE1:rbyte_avg#0000FF:Read 
+    GPRINT:rbyte_min:MIN:%5.1lf%s Min,
+    GPRINT:rbyte_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rbyte_max:MAX:%5.1lf%s Max,
+    GPRINT:rbyte_avg:LAST:%5.1lf%s Last\l
+
+Graph apache_connections
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Connections
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph mysql_qcache
+    --vertical-label : "Queries/s"
+    DEF:hits_min={file}:hits:MIN
+    DEF:hits_avg={file}:hits:AVERAGE
+    DEF:hits_max={file}:hits:MAX
+    DEF:inserts_min={file}:inserts:MIN
+    DEF:inserts_avg={file}:inserts:AVERAGE
+    DEF:inserts_max={file}:inserts:MAX
+    DEF:not_cached_min={file}:not_cached:MIN
+    DEF:not_cached_avg={file}:not_cached:AVERAGE
+    DEF:not_cached_max={file}:not_cached:MAX
+    DEF:lowmem_prunes_min={file}:lowmem_prunes:MIN
+    DEF:lowmem_prunes_avg={file}:lowmem_prunes:AVERAGE
+    DEF:lowmem_prunes_max={file}:lowmem_prunes:MAX
+    DEF:queries_min={file}:queries_in_cache:MIN
+    DEF:queries_avg={file}:queries_in_cache:AVERAGE
+    DEF:queries_max={file}:queries_in_cache:MAX
+    CDEF:unknown=queries_avg,UNKN,+
+    CDEF:not_cached_agg=hits_avg,inserts_avg,+,not_cached_avg,+
+    CDEF:inserts_agg=hits_avg,inserts_avg,+
+    CDEF:hits_agg=hits_avg
+    AREA:not_cached_agg#F3DFB7
+    AREA:inserts_agg#B7B7F7
+    AREA:hits_agg#B7EFB7
+    LINE1:not_cached_agg#F0A000:Not Cached      
+    GPRINT:not_cached_min:MIN:%5.2lf Min,
+    GPRINT:not_cached_avg:AVERAGE:%5.2lf Avg,
+    GPRINT:not_cached_max:MAX:%5.2lf Max,
+    GPRINT:not_cached_avg:LAST:%5.2lf Last\l
+    LINE1:inserts_agg#0000FF:Inserts         
+    GPRINT:inserts_min:MIN:%5.2lf Min,
+    GPRINT:inserts_avg:AVERAGE:%5.2lf Avg,
+    GPRINT:inserts_max:MAX:%5.2lf Max,
+    GPRINT:inserts_avg:LAST:%5.2lf Last\l
+    LINE1:hits_agg#00E000:Hits            
+    GPRINT:hits_min:MIN:%5.2lf Min,
+    GPRINT:hits_avg:AVERAGE:%5.2lf Avg,
+    GPRINT:hits_max:MAX:%5.2lf Max,
+    GPRINT:hits_avg:LAST:%5.2lf Last\l
+    LINE1:lowmem_prunes_avg#FF0000:Lowmem Prunes   
+    GPRINT:lowmem_prunes_min:MIN:%5.2lf Min,
+    GPRINT:lowmem_prunes_avg:AVERAGE:%5.2lf Avg,
+    GPRINT:lowmem_prunes_max:MAX:%5.2lf Max,
+    GPRINT:lowmem_prunes_avg:LAST:%5.2lf Last\l
+    LINE1:unknown#FFFFFF:Queries in cache
+    GPRINT:queries_min:MIN:%5.0lf Min,
+    GPRINT:queries_avg:AVERAGE:%5.0lf Avg,
+    GPRINT:queries_max:MAX:%5.0lf Max,
+    GPRINT:queries_avg:LAST:%5.0lf Last\l
+
+Graph pg_blks
+    DEF:pg_blks_avg={file}:value:AVERAGE
+    DEF:pg_blks_min={file}:value:MIN
+    DEF:pg_blks_max={file}:value:MAX
+    AREA:pg_blks_max#B7B7F7
+    AREA:pg_blks_min#FFFFFF
+    LINE1:pg_blks_avg#0000FF:Blocks
+    GPRINT:pg_blks_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_blks_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_blks_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_blks_avg:LAST:%4.1lf%s Last
+
+Graph conntrack
+    --vertical-label : "Entries"
+    DEF:min={file}:entropy:MIN
+    DEF:avg={file}:entropy:AVERAGE
+    DEF:max={file}:entropy:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Count
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph pg_numbackends
+    DEF:pg_numbackends_avg={file}:value:AVERAGE
+    DEF:pg_numbackends_min={file}:value:MIN
+    DEF:pg_numbackends_max={file}:value:MAX
+    AREA:pg_numbackends_max#B7B7F7
+    AREA:pg_numbackends_min#FFFFFF
+    LINE1:pg_numbackends_avg#0000FF:Backends
+    GPRINT:pg_numbackends_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_numbackends_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_numbackends_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_numbackends_avg:LAST:%4.1lf%s Last
+
+Graph disk_time
+    --vertical-label : "Seconds/s"
+    DEF:out_min_raw={file}:write:MIN
+    DEF:out_avg_raw={file}:write:AVERAGE
+    DEF:out_max_raw={file}:write:MAX
+    DEF:inc_min_raw={file}:read:MIN
+    DEF:inc_avg_raw={file}:read:AVERAGE
+    DEF:inc_max_raw={file}:read:MAX
+    CDEF:out_min=out_min_raw,1000,/
+    CDEF:out_avg=out_avg_raw,1000,/
+    CDEF:out_max=out_max_raw,1000,/
+    CDEF:inc_min=inc_min_raw,1000,/
+    CDEF:inc_avg=inc_avg_raw,1000,/
+    CDEF:inc_max=inc_max_raw,1000,/
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_avg#00E000:Written
+    GPRINT:out_avg:AVERAGE:%5.1lf%ss Avg,
+    GPRINT:out_max:MAX:%5.1lf%ss Max,
+    GPRINT:out_avg:LAST:%5.1lf%ss Last\l
+    LINE1:inc_avg#0000FF:Read   
+    GPRINT:inc_avg:AVERAGE:%5.1lf%ss Avg,
+    GPRINT:inc_max:MAX:%5.1lf%ss Max,
+    GPRINT:inc_avg:LAST:%5.1lf%ss Last\l
+
+Graph haproxy_sessions
+    --lower-limit : "0"
+    --vertical-label : "Sessions"
+    DEF:que_min={file}:qcur:MIN
+    DEF:que_ave={file}:qcur:AVERAGE
+    DEF:que_max={file}:qcur:MAX
+    DEF:ses_min={file}:scur:MIN
+    DEF:ses_ave={file}:scur:AVERAGE
+    DEF:ses_max={file}:scur:MAX
+    AREA:que_ave#F7B7B7
+    LINE1:ses_ave#00E000:Current Sessions
+    GPRINT:ses_min:MIN:Min\: %2.lf
+    GPRINT:ses_ave:AVERAGE:Ave\: %2.lf
+    GPRINT:ses_max:MAX:Max\: %2.lf
+    GPRINT:ses_ave:LAST:Last\: %2.lf\j
+    LINE1:que_ave#FF0000:Average Queue
+    GPRINT:que_min:MIN:Min\: %2.lf
+    GPRINT:que_ave:AVERAGE:Ave\: %2.lf
+    GPRINT:que_max:MAX:Max\: %2.lf
+    GPRINT:que_ave:LAST:Last\: %2.lf\j
+    COMMENT: \n
+    COMMENT: qcur is the current queue size \n
+    COMMENT: scur is the current number of sessions 
+
+Graph uptime
+    --vertical-label : "Days"
+    DEF:avg_raw={file}:value:AVERAGE
+    DEF:min_raw={file}:value:MIN
+    DEF:max_raw={file}:value:MAX
+    CDEF:avg=avg_raw,86400,/
+    CDEF:min=min_raw,86400,/
+    CDEF:max=max_raw,86400,/
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Uptime
+    GPRINT:min:MIN:%9.3lf Min,
+    GPRINT:avg:AVERAGE:%9.3lf Average,
+    GPRINT:max:MAX:%9.3lf Max,
+    GPRINT:avg:LAST:%9.3lf Last\l
+
+Graph ping
+    DEF:ping_avg={file}:ping:AVERAGE
+    DEF:ping_min={file}:ping:MIN
+    DEF:ping_max={file}:ping:MAX
+    AREA:ping_max#B7B7F7
+    AREA:ping_min#FFFFFF
+    LINE1:ping_avg#0000FF:Ping
+    GPRINT:ping_min:MIN:%4.1lf ms Min,
+    GPRINT:ping_avg:AVERAGE:%4.1lf ms Avg,
+    GPRINT:ping_max:MAX:%4.1lf ms Max,
+    GPRINT:ping_avg:LAST:%4.1lf ms Last
+
+Graph virt_vcpu
+    --units-exponent : "0"
+    --vertical-label : "CPU load (%)"
+    DEF:avg_1={file}:value:AVERAGE
+    DEF:min_1={file}:value:MIN
+    DEF:max_1={file}:value:MAX
+    CDEF:avg=avg_1,10000000,/
+    CDEF:min=min_1,10000000,/
+    CDEF:max=max_1,10000000,/
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Percent
+    GPRINT:min:MIN:%6.2lf%% Min,
+    GPRINT:avg:AVERAGE:%6.2lf%% Avg,
+    GPRINT:max:MAX:%6.2lf%% Max,
+    GPRINT:avg:LAST:%6.2lf%% Last\l
+
+Graph vs_threads
+    DEF:total_avg={file}:total:AVERAGE
+    DEF:total_min={file}:total:MIN
+    DEF:total_max={file}:total:MAX
+    DEF:running_avg={file}:running:AVERAGE
+    DEF:running_min={file}:running:MIN
+    DEF:running_max={file}:running:MAX
+    DEF:uninterruptible_avg={file}:uninterruptible:AVERAGE
+    DEF:uninterruptible_min={file}:uninterruptible:MIN
+    DEF:uninterruptible_max={file}:uninterruptible:MAX
+    DEF:onhold_avg={file}:onhold:AVERAGE
+    DEF:onhold_min={file}:onhold:MIN
+    DEF:onhold_max={file}:onhold:MAX
+    LINE1:total_avg#F0A000:Total   
+    GPRINT:total_min:MIN:%5.1lf Min,
+    GPRINT:total_avg:AVERAGE:%5.1lf Avg.,
+    GPRINT:total_max:MAX:%5.1lf Max,
+    GPRINT:total_avg:LAST:%5.1lf Last\l
+    LINE1:running_avg#FF0000:Running 
+    GPRINT:running_min:MIN:%5.1lf Min,
+    GPRINT:running_avg:AVERAGE:%5.1lf Avg.,
+    GPRINT:running_max:MAX:%5.1lf Max,
+    GPRINT:running_avg:LAST:%5.1lf Last\l
+    LINE1:uninterruptible_avg#00E000:Unintr  
+    GPRINT:uninterruptible_min:MIN:%5.1lf Min,
+    GPRINT:uninterruptible_avg:AVERAGE:%5.1lf Avg.,
+    GPRINT:uninterruptible_max:MAX:%5.1lf Max,
+    GPRINT:uninterruptible_avg:LAST:%5.1lf Last\l
+    LINE1:onhold_avg#0000FF:Onhold  
+    GPRINT:onhold_min:MIN:%5.1lf Min,
+    GPRINT:onhold_avg:AVERAGE:%5.1lf Avg.,
+    GPRINT:onhold_max:MAX:%5.1lf Max,
+    GPRINT:onhold_avg:LAST:%5.1lf Last\l
+
+Graph pg_db_size
+    DEF:pg_db_size_avg={file}:value:AVERAGE
+    DEF:pg_db_size_min={file}:value:MIN
+    DEF:pg_db_size_max={file}:value:MAX
+    AREA:pg_db_size_max#B7B7F7
+    AREA:pg_db_size_min#FFFFFF
+    LINE1:pg_db_size_avg#0000FF:Bytes
+    GPRINT:pg_db_size_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_db_size_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_db_size_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_db_size_avg:LAST:%4.1lf%s Last
+
+Graph response_time
+    --lower-limit : "0"
+    --vertical-label : "Seconds"
+    DEF:rt_avg={file}:value:AVERAGE
+    DEF:rt_min={file}:value:MIN
+    DEF:rt_max={file}:value:MAX
+    AREA:rt_max#B7B7F7
+    AREA:rt_min#FFFFFF
+    LINE1:rt_avg#0000FF:Response Time
+    GPRINT:rt_min:MIN:%4.1lf ms Min,
+    GPRINT:rt_avg:AVERAGE:%4.1lf ms Avg,
+    GPRINT:rt_max:MAX:%4.1lf ms Max,
+    GPRINT:rt_avg:LAST:%4.1lf ms Last
+
+Graph users
+    --vertical-label : "Users"
+    DEF:users_avg={file}:value:AVERAGE
+    DEF:users_min={file}:value:MIN
+    DEF:users_max={file}:value:MAX
+    AREA:users_max#B7B7F7
+    AREA:users_min#FFFFFF
+    LINE1:users_avg#0000FF:Users
+    GPRINT:users_min:MIN:%4.1lf Min,
+    GPRINT:users_avg:AVERAGE:%4.1lf Average,
+    GPRINT:users_max:MAX:%4.1lf Max,
+    GPRINT:users_avg:LAST:%4.1lf Last\l
+
+Graph nginx_connections
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Requests/s
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+Graph multimeter
+    DEF:multimeter_avg={file}:value:AVERAGE
+    DEF:multimeter_min={file}:value:MIN
+    DEF:multimeter_max={file}:value:MAX
+    AREA:multimeter_max#B7B7F7
+    AREA:multimeter_min#FFFFFF
+    LINE1:multimeter_avg#0000FF:Multimeter
+    GPRINT:multimeter_min:MIN:%4.1lf Min,
+    GPRINT:multimeter_avg:AVERAGE:%4.1lf Average,
+    GPRINT:multimeter_max:MAX:%4.1lf Max,
+    GPRINT:multimeter_avg:LAST:%4.1lf Last\l
+
+Graph swap_io
+    DEF:min={file}:value:MIN
+    DEF:avg={file}:value:AVERAGE
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF
+    GPRINT:min:MIN:%6.2lf Min,
+    GPRINT:avg:AVERAGE:%6.2lf Avg,
+    GPRINT:max:MAX:%6.2lf Max,
+    GPRINT:avg:LAST:%6.2lf Last
+
+MetaGraph ps_state
+    --vertical-label : "Processes"
+    paging: #ffb000
+    blocked: #ff00ff
+    zombies: #ff0000
+    stopped: #a000a0
+    running: #00e000
+    sleeping: #0000ff
+
+Graph dns_traffic
+    DEF:rsp_min_raw={file}:responses:MIN
+    DEF:rsp_avg_raw={file}:responses:AVERAGE
+    DEF:rsp_max_raw={file}:responses:MAX
+    DEF:qry_min_raw={file}:queries:MIN
+    DEF:qry_avg_raw={file}:queries:AVERAGE
+    DEF:qry_max_raw={file}:queries:MAX
+    CDEF:rsp_min=rsp_min_raw,8,*
+    CDEF:rsp_avg=rsp_avg_raw,8,*
+    CDEF:rsp_max=rsp_max_raw,8,*
+    CDEF:qry_min=qry_min_raw,8,*
+    CDEF:qry_avg=qry_avg_raw,8,*
+    CDEF:qry_max=qry_max_raw,8,*
+    CDEF:overlap=rsp_avg,qry_avg,GT,qry_avg,rsp_avg,IF
+    CDEF:mytime=rsp_avg_raw,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:rsp_avg_sample=rsp_avg_raw,UN,0,rsp_avg_raw,IF,sample_len,*
+    CDEF:rsp_avg_sum=PREV,UN,0,PREV,IF,rsp_avg_sample,+
+    CDEF:qry_avg_sample=qry_avg_raw,UN,0,qry_avg_raw,IF,sample_len,*
+    CDEF:qry_avg_sum=PREV,UN,0,PREV,IF,qry_avg_sample,+
+    AREA:rsp_avg#B7EFB7
+    AREA:qry_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:rsp_avg#00E000:Responses
+    GPRINT:rsp_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:rsp_max:MAX:%5.1lf%s Max,
+    GPRINT:rsp_avg:LAST:%5.1lf%s Last
+    GPRINT:rsp_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:qry_avg#0000FF:Queries  
+    GPRINT:qry_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:qry_max:MAX:%5.1lf%s Max,
+    GPRINT:qry_avg:LAST:%5.1lf%s Last
+    GPRINT:qry_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+
+Graph disk_merged
+    --vertical-label : "Bytes/s"
+    DEF:out_min={file}:write:MIN
+    DEF:out_avg={file}:write:AVERAGE
+    DEF:out_max={file}:write:MAX
+    DEF:inc_min={file}:read:MIN
+    DEF:inc_avg={file}:read:AVERAGE
+    DEF:inc_max={file}:read:MAX
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE1:out_avg#00E000:Written
+    GPRINT:out_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:out_max:MAX:%6.2lf Max,
+    GPRINT:out_avg:LAST:%6.2lf Last\l
+    LINE1:inc_avg#0000FF:Read   
+    GPRINT:inc_avg:AVERAGE:%6.2lf Avg,
+    GPRINT:inc_max:MAX:%6.2lf Max,
+    GPRINT:inc_avg:LAST:%6.2lf Last\l
+
+Graph pg_n_tup_c
+    DEF:pg_n_tup_avg={file}:value:AVERAGE
+    DEF:pg_n_tup_min={file}:value:MIN
+    DEF:pg_n_tup_max={file}:value:MAX
+    AREA:pg_n_tup_max#B7B7F7
+    AREA:pg_n_tup_min#FFFFFF
+    LINE1:pg_n_tup_avg#0000FF:Tuples
+    GPRINT:pg_n_tup_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_n_tup_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_n_tup_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_n_tup_avg:LAST:%4.1lf%s Last
+
+Graph pg_n_tup_g
+    DEF:pg_n_tup_avg={file}:value:AVERAGE
+    DEF:pg_n_tup_min={file}:value:MIN
+    DEF:pg_n_tup_max={file}:value:MAX
+    AREA:pg_n_tup_max#B7B7F7
+    AREA:pg_n_tup_min#FFFFFF
+    LINE1:pg_n_tup_avg#0000FF:Tuples
+    GPRINT:pg_n_tup_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_n_tup_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_n_tup_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_n_tup_avg:LAST:%4.1lf%s Last
+
+Graph ps_pagefaults
+    --vertical-label : "Pagefaults/s"
+    DEF:minor_avg={file}:minflt:AVERAGE
+    DEF:minor_min={file}:minflt:MIN
+    DEF:minor_max={file}:minflt:MAX
+    DEF:major_avg={file}:majflt:AVERAGE
+    DEF:major_min={file}:majflt:MIN
+    DEF:major_max={file}:majflt:MAX
+    CDEF:minor_major=major_avg,UN,0,major_avg,IF,minor_avg,+
+    AREA:minor_major#B7B7F7
+    AREA:major_avg#F7B7B7
+    LINE1:minor_major#0000FF:Minor
+    GPRINT:minor_min:MIN:%5.1lf%s Min,
+    GPRINT:minor_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:minor_max:MAX:%5.1lf%s Max,
+    GPRINT:minor_avg:LAST:%5.1lf%s Last\l
+    LINE1:major_avg#FF0000:Major
+    GPRINT:major_min:MIN:%5.1lf%s Min,
+    GPRINT:major_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:major_max:MAX:%5.1lf%s Max,
+    GPRINT:major_avg:LAST:%5.1lf%s Last\l
+
+Graph old_memory
+    DEF:used_avg={file}:used:AVERAGE
+    DEF:free_avg={file}:free:AVERAGE
+    DEF:buffers_avg={file}:buffers:AVERAGE
+    DEF:cached_avg={file}:cached:AVERAGE
+    DEF:used_min={file}:used:MIN
+    DEF:free_min={file}:free:MIN
+    DEF:buffers_min={file}:buffers:MIN
+    DEF:cached_min={file}:cached:MIN
+    DEF:used_max={file}:used:MAX
+    DEF:free_max={file}:free:MAX
+    DEF:buffers_max={file}:buffers:MAX
+    DEF:cached_max={file}:cached:MAX
+    CDEF:cached_avg_nn=cached_avg,UN,0,cached_avg,IF
+    CDEF:buffers_avg_nn=buffers_avg,UN,0,buffers_avg,IF
+    CDEF:free_cached_buffers_used=free_avg,cached_avg_nn,+,buffers_avg_nn,+,used_avg,+
+    CDEF:cached_buffers_used=cached_avg,buffers_avg_nn,+,used_avg,+
+    CDEF:buffers_used=buffers_avg,used_avg,+
+    AREA:free_cached_buffers_used#B7EFB7
+    AREA:cached_buffers_used#B7B7F7
+    AREA:buffers_used#F3DFB7
+    AREA:used_avg#F7B7B7
+    LINE1:free_cached_buffers_used#00E000:Free        
+    GPRINT:free_min:MIN:%5.1lf%s Min,
+    GPRINT:free_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:free_max:MAX:%5.1lf%s Max,
+    GPRINT:free_avg:LAST:%5.1lf%s Last\l
+    LINE1:cached_buffers_used#0000FF:Page cache  
+    GPRINT:cached_min:MIN:%5.1lf%s Min,
+    GPRINT:cached_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:cached_max:MAX:%5.1lf%s Max,
+    GPRINT:cached_avg:LAST:%5.1lf%s Last\l
+    LINE1:buffers_used#F0A000:Buffer cache
+    GPRINT:buffers_min:MIN:%5.1lf%s Min,
+    GPRINT:buffers_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:buffers_max:MAX:%5.1lf%s Max,
+    GPRINT:buffers_avg:LAST:%5.1lf%s Last\l
+    LINE1:used_avg#FF0000:Used        
+    GPRINT:used_min:MIN:%5.1lf%s Min,
+    GPRINT:used_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:used_max:MAX:%5.1lf%s Max,
+    GPRINT:used_avg:LAST:%5.1lf%s Last\l
+
+Graph counter
+    --vertical-label : "Count"
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#F7B7B7
+    AREA:min#FFFFFF
+    LINE1:max#FF0000:Count 
+    GPRINT:min:MIN:%4.1lf Min,
+    GPRINT:avg:AVERAGE:%4.1lf Avg,
+    GPRINT:max:MAX:%4.1lf Max,
+    GPRINT:avg:LAST:%4.1lf Last\l
+
+Graph pg_xact
+    DEF:pg_xact_avg={file}:value:AVERAGE
+    DEF:pg_xact_min={file}:value:MIN
+    DEF:pg_xact_max={file}:value:MAX
+    AREA:pg_xact_max#B7B7F7
+    AREA:pg_xact_min#FFFFFF
+    LINE1:pg_xact_avg#0000FF:Transactions
+    GPRINT:pg_xact_min:MIN:%4.1lf%s Min,
+    GPRINT:pg_xact_avg:AVERAGE:%4.1lf%s Avg,
+    GPRINT:pg_xact_max:MAX:%4.1lf%s Max,
+    GPRINT:pg_xact_avg:LAST:%4.1lf%s Last
+
+Graph haproxy_status
+    --lower-limit : "0"
+    --vertical-label : "Status"
+    DEF:stat_min={file}:status:MIN
+    DEF:stat_ave={file}:status:AVERAGE
+    DEF:stat_max={file}:status:MAX
+    AREA:stat_ave#F7B7B7
+    LINE1:stat_ave#FF0000:Status
+    GPRINT:stat_min:MIN:Min\: %2.lf
+    GPRINT:stat_ave:AVERAGE:Ave\: %2.lf
+    GPRINT:stat_max:MAX:Max\: %2.lf
+    GPRINT:stat_ave:LAST:Last\: %2.lf\j
+
+Graph haproxy_traffic
+    --lower-limit : "0"
+    --vertical-label : "Req/s"
+    DEF:stot_min={file}:stot:MIN
+    DEF:stot_ave={file}:stot:AVERAGE
+    DEF:stot_max={file}:stot:MAX
+    AREA:stot_ave#F7B7B7
+    LINE1:stot_ave#FF0000:Total Session
+    GPRINT:stot_min:MIN:Min\: %2.lf
+    GPRINT:stot_ave:AVERAGE:Ave\: %2.lf
+    GPRINT:stot_max:MAX:Max\: %2.lf
+    GPRINT:stot_ave:LAST:Last\: %2.lf\j
+
+Graph if_octets
+    --lower-limit : "0"
+    --vertical-label : "Bits/s"
+    DEF:out_min_raw={file}:tx:MIN
+    DEF:out_avg_raw={file}:tx:AVERAGE
+    DEF:out_max_raw={file}:tx:MAX
+    DEF:inc_min_raw={file}:rx:MIN
+    DEF:inc_avg_raw={file}:rx:AVERAGE
+    DEF:inc_max_raw={file}:rx:MAX
+    CDEF:out_min=out_min_raw,8,*
+    CDEF:out_avg=out_avg_raw,8,*
+    CDEF:out_max=out_max_raw,8,*
+    CDEF:inc_min=inc_min_raw,8,*
+    CDEF:inc_avg=inc_avg_raw,8,*
+    CDEF:inc_max=inc_max_raw,8,*
+    CDEF:overlap=out_avg,inc_avg,GT,inc_avg,out_avg,IF
+    CDEF:mytime=out_avg_raw,TIME,TIME,IF
+    CDEF:sample_len_raw=mytime,PREV(mytime),-
+    CDEF:sample_len=sample_len_raw,UN,0,sample_len_raw,IF
+    CDEF:out_avg_sample=out_avg_raw,UN,0,out_avg_raw,IF,sample_len,*
+    CDEF:out_avg_sum=PREV,UN,0,PREV,IF,out_avg_sample,+
+    CDEF:inc_avg_sample=inc_avg_raw,UN,0,inc_avg_raw,IF,sample_len,*
+    CDEF:inc_avg_sum=PREV,UN,0,PREV,IF,inc_avg_sample,+
+    VDEF:out_95=out_avg,95,PERCENT
+    VDEF:inc_95=inc_avg,95,PERCENT
+    AREA:out_avg#B7EFB7
+    AREA:inc_avg#B7B7F7
+    AREA:overlap#89B3C9
+    LINE2:out_95#00E000
+    LINE2:inc_95#0000FF
+    LINE1:out_avg#00E000:Outgoing
+    GPRINT:out_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:out_max:MAX:%5.1lf%s Max,
+    GPRINT:out_avg:LAST:%5.1lf%s Last
+    GPRINT:out_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:out_avg#00E000:Outgoing
+    GPRINT:out_95:%5.1lf%s 95th Percentile\l
+    LINE1:inc_avg#0000FF:Incoming
+    GPRINT:inc_avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:inc_max:MAX:%5.1lf%s Max,
+    GPRINT:inc_avg:LAST:%5.1lf%s Last
+    GPRINT:inc_avg_sum:LAST:(ca. %5.1lf%sB Total)\l
+    LINE1:inc_avg#0000FF:Incoming
+    GPRINT:inc_95:%5.1lf%s 95th Percentile\l
+
+Graph dns_opcode
+    DEF:avg={file}:value:AVERAGE
+    DEF:min={file}:value:MIN
+    DEF:max={file}:value:MAX
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Queries/s
+    GPRINT:min:MIN:%9.3lf Min,
+    GPRINT:avg:AVERAGE:%9.3lf Average,
+    GPRINT:max:MAX:%9.3lf Max,
+    GPRINT:avg:LAST:%9.3lf Last\l
+
+MetaGraph cpu
+    --vertical-label : "Percent"
+    idle: #ffffff
+    nice: #00e000
+    user: #0000ff
+    wait: #ffb000
+    system: #ff0000
+    softirq: #ff00ff
+    interrupt: #a000a0
+    steal: #000000
+
+Graph if_collisions
+    --vertical-label : "Collisions/s"
+    DEF:min_raw={file}:value:MIN
+    DEF:avg_raw={file}:value:AVERAGE
+    DEF:max_raw={file}:value:MAX
+    CDEF:min=min_raw,8,*
+    CDEF:avg=avg_raw,8,*
+    CDEF:max=max_raw,8,*
+    AREA:max#B7B7F7
+    AREA:min#FFFFFF
+    LINE1:avg#0000FF:Collisions/s
+    GPRINT:min:MIN:%5.1lf %s Min,
+    GPRINT:avg:AVERAGE:%5.1lf%s Avg,
+    GPRINT:max:MAX:%5.1lf%s Max,
+    GPRINT:avg:LAST:%5.1lf%s Last\l
+
+ALIAS dns_rcode = dns_opcode
+ALIAS vmpage_io-swap = vmpage_io
+ALIAS mysql_handler = mysql_commands
+ALIAS vmpage_io-memory = vmpage_io
+ALIAS if_tx_errors = if_rx_errors
+ALIAS dns_record = dns_qtype
+ALIAS if_multicast = ipt_packets

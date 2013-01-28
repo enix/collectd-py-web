@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import
+
+import gevent.monkey
+gevent.monkey.patch_all()
+
+try:
+    import collectdweb
+except ImportError:
+    import sys, os
+    sys.path.append( os.path.join( os.path.dirname( __file__), '..'))
+
+import collectdweb.application
+import collectdweb.statics
+import bottle
+
+bottle.run( server='gevent')
