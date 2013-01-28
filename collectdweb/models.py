@@ -160,8 +160,8 @@ class Graph(object):
                 type=self.full_name,
                 )
 
-    def generate(self, start, end, format=None):
-        return self.graphdef.build( self.title, self.rrd_source(), start, end, format)
+    def generate(self, start, end, **kw):
+        return self.graphdef.build( self.title, self.rrd_source(), start, end, **kw)
 
     def rrd_source(self):
         prefix_plugin = self.plugin.get_path() + '/'

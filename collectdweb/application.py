@@ -90,12 +90,15 @@ def show_graph( host_name, plugin_name, type, plugin_instance=None, type_instanc
             parameters.get('timespan'),
             parameters.get('start'),
             parameters.get('end'))
+
     format = parameters.get('format','').lower()
     if not format in SUPPORTED_FORMATS:
         format = 'png'
 
+    upper = parameters.get('upper')
+
     try:
-        image = graph.generate( start, end, format)
+        image = graph.generate( start, end, format=format, upper=upper)
     except ValueError, e:
         raise bottle.HTTPError( 400, e)
 

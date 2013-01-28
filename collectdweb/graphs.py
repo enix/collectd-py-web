@@ -30,7 +30,9 @@ class Library(object):
 class FakeGraph(object):
     list_type_instances = True
     error_file = get_shared( 'icons/error.png')
-    def build( self, title, sources, start, end, format=None):
+    def build( self, title, sources, start, end, format=None, **kw):
+        if format is not None and format != 'png':
+            raise ValueError, 'Errors are only disponible in PNG'
         return open( self.error_file, 'rb')
 
 class RrdCommand( object):
@@ -82,7 +84,7 @@ class BaseGraph( object):
         for param, value in zip( opts, opts):
             out.write( '    %s : "%s"\n' % (param, value))
 
-    def build( self, title, sources, start, end=None, format=None):
+    def build( self, title, sources, start, end=None, format=None, upper=None):
         args = [
                 'graph',
                 '-',
@@ -92,6 +94,8 @@ class BaseGraph( object):
                 ]
         if end:
             args.extend([ '-e', end ])
+        if upper: 
+            args.extend([ '--upper-limit', upper ])
 
         args.extend( self.DEFAULT_OPTIONS)
         args.extend( self.opts )
