@@ -119,7 +119,7 @@
             this.trigger( 'export', this);
         },
         exportLink: function() {
-            this.trigger( 'export-link', this.src);
+            this.trigger( 'export-link', this);
         },
         checkLazy: function( windowTop) {
             var elemTop = this.$el.offset().top;

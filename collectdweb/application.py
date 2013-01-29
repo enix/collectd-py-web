@@ -79,12 +79,14 @@ def list_graphs( host_name, plugin):
 
     return [ get_url( graph) for graph in graphes ]
 
-@bottle.route('/sign/<path:path>', apply=dump_json)
-def get_sign( path):
-    url = '/exports/' + path
-    return {
-            'path' : url + '?sign='+ signature.sign( url)
-            }
+@bottle.route('/sign/', apply=dump_json)
+def get_sign():
+    urls = bottle.request.GET.getall( 'url')
+    urls = ( '/export' + url for url in urls if url.startswith('/graph/') )
+    return [
+             url + '?sign='+ signature.sign( url)
+             for url in urls
+            ]
 
 @bottle.route('/graph/<host_name>/<plugin>/<type>.png')
 @bottle.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=signature)

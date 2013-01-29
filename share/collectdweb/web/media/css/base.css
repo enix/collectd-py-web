@@ -220,6 +220,9 @@ li.gc:hover .gc-menu {
     font-family: "Courier New", Courier, monospace;
 }
 
+#exports-dialog {
+    display: none;
+}
 #output-dialog {
     display: none;
 }

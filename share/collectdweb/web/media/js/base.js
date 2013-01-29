@@ -465,22 +465,49 @@ return false;
             this.$el.dialog('open');
         }
     });
+    var ExportDialog = Backbone.View.extend({
+        initialize: function() {
+            this.setElement('#exports-dialog');
+            this.$el.dialog({
+                title : 'Exportable urls of the graphes',
+                modal : true,
+                autoOpen: false
+            }).parent().css('z-index', '50');
+        },
+        template: Mustache.compile(
+            '<pre>{{#urls}}' +
+            '{{.}}\n'+
+            '{{/urls}}</pre>' + 
+            '<div>{{#urls}}' +
+            '<input type="text" value="{{.}}" /><br />' +
+            '{{/urls}}</div>'
+        ),
+        launch: function(urls) {
+            this.$('.content').empty().append( this.template({ urls: urls }));
+            this.$el.dialog('open');
+        }
+    });
 
     var GridView = Backbone.View.extend({
         initialize: function() {
             this.setElement( '#graph-container');
             this.selected = [];
             this.outputDialog = new OutputDialog();
+            this.exportDialog = new ExportDialog();
         },
-        exportDialog: function( view ) {
+        output: function( view ) {
             this.outputDialog.launch( view.getImgSrc());
         },
-        exportLink: function( url) {
+        exportLink: function( view) {
+            var views = this._getSelected( view);
             Backbone.ajax({
-                url : '/sign'+url
-            }).done( function(sign) {
-                console.log(sign.path);
-            });
+                url : '/sign/',
+                data: _.map( views, function( view) {
+                    return { name: 'url', value: view.src };
+                })
+            }).done( function(signatures) {
+                this.exportDialog.launch(signatures);
+            }.bind(this));
         },
         setView: function( view ) {
             if ( view === 'grid') {
@@ -560,7 +587,7 @@ return false;
         },
         displayGraphes: function( graphes) {
             var end = new Date();
-            var start = addTime( end, -1, 'hour');
+            var start = addTime( end, -1, 'day');
 
             var container = $('<ul>');
             this.views = _.map( graphes, function( url ) {
@@ -571,7 +598,7 @@ return false;
                     end: end
                 });
                 view.on( 'select', this.select, this);
-                view.on( 'export', this.exportDialog, this);
+                view.on( 'export', this.output, this);
                 view.on( 'export-link', this.exportLink, this);
                 container.append(view.render().el);
                 return view;
