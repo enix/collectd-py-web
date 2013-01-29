@@ -77,6 +77,8 @@ def list_graphs( host_name, plugin):
     if len( plugins) > 1:
         graphes.extend( host.plugins.get( plugin_name, '*').graphes.all() )
 
+    graphes.sort( key=lambda x:( x.plugin.full_name, x.full_name))
+
     return [ get_url( graph) for graph in graphes ]
 
 @bottle.route('/sign/', apply=dump_json)
