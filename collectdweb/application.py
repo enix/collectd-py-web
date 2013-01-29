@@ -9,6 +9,39 @@ from collectdweb.plugins import DumpInJSON, Signature
 dump_json =  DumpInJSON()
 signature = Signature()
 
+SUPPORTED_FORMATS = {
+        'pdf': 'application:pdf',
+        'eps': 'application/epd', 
+        'svg': 'image/svg+xml',
+        'png': 'image/png'
+        }
+TIMESPANS = {
+        'hour': 3600,
+        'day' : 24 * 3600,
+        'week' : 7 * 24 * 3600,
+        'month' : 31 * 24 * 3600,
+        'year' : 366 * 24 * 3600
+        }
+
+def _resolve_timespan( timespan_name, start, end):
+    timespan = TIMESPANS.get( timespan_name) or TIMESPANS['hour']
+    if start and end:
+        return str( start), str(end)
+    elif start and timespan:
+        return start, 'start+%s' % timespan
+    else:
+        return '-' + str(timespan), ''
+
+def split( name):
+    return name.split( '-', 1) if '-' in name else ( name, None)
+
+def get_url( graph):
+    return '/graph/{host}/{plugin}/{graph_name}.png'.format(
+            host = graph.plugin.host.name,
+            plugin = graph.plugin.full_name,
+            graph_name = graph.full_name
+            )
+
 @bottle.route('/hosts/', apply=dump_json)
 def list_hosts():
     return Host.objects.names()
@@ -21,37 +54,27 @@ def list_plugins( host_name):
     except Host.DoesNotExist:
         raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
 
-def split( name):
-    return name.split( '-', 1) if '-' in name else ( name, None)
-
 @bottle.route('/hosts/<host_name>/<plugin>/', apply=dump_json)
 def list_graphs( host_name, plugin):
     plugin_name, plugin_instance = split( plugin)
     try:
+        host = Host.objects.get( host_name)
         if plugin_instance is None:
             plugins = [ plugin 
-                    for plugin in Host.objects.get( host_name).plugins.all()
+                    for plugin in host.plugins.all()
                     if plugin.name == plugin_name ]
         else:
-            plugins = [ Host.objects.get( host_name).plugins.get(plugin_name, plugin_instance) ]
+            plugins = [ host.plugins.get(plugin_name, plugin_instance) ]
     except Host.DoesNotExist:
         raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
     except Plugin.DoesNotExist:
         plugins = []
 
-    plugins.sort( key=lambda x:x.instance)
     graphes = []
     for plugin in plugins:
         graphes.extend( plugin.graphes.all() )
 
     return [ get_url( graph) for graph in graphes ]
-
-def get_url( graph):
-    return '/graph/{host}/{plugin}/{graph_name}.png'.format(
-            host = graph.plugin.host.name,
-            plugin = graph.plugin.full_name,
-            graph_name = graph.full_name
-            )
 
 @bottle.route('/sign/<path:path>', apply=dump_json)
 def get_sign( path):
@@ -60,13 +83,6 @@ def get_sign( path):
             'path' : url + '?sign='+ signature.sign( url)
             }
 
-
-SUPPORTED_FORMATS = {
-        'pdf': 'application:pdf',
-        'eps': 'application/epd', 
-        'svg': 'image/svg+xml',
-        'png': 'image/png'
-        }
 @bottle.route('/graph/<host_name>/<plugin>/<type>.png')
 @bottle.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=signature)
 def show_graph( host_name, plugin, type ):
@@ -106,22 +122,6 @@ def show_graph( host_name, plugin, type ):
 
     return image
 
-TIMESPANS = {
-        'hour': 3600,
-        'day' : 24 * 3600,
-        'week' : 7 * 24 * 3600,
-        'month' : 31 * 24 * 3600,
-        'year' : 366 * 24 * 3600
-        }
-
-def _resolve_timespan( timespan_name, start, end):
-    timespan = TIMESPANS.get( timespan_name) or TIMESPANS['hour']
-    if start and end:
-        return str( start), str(end)
-    elif start and timespan:
-        return start, 'start+%s' % timespan
-    else:
-        return '-' + str(timespan), ''
 
 if __name__ == '__main__':
     bottle.debug( True)

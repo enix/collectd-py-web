@@ -112,7 +112,12 @@ class RRDObject(object):
 
     @property
     def full_name(self):
-        return self.name + ( '-' + self.instance if self._is_single_file() else '')
+        return self.name + ( ''
+                if self._has_no_instance() else
+                '-' + self.instance
+                if self._is_single_file() else
+                '-*')
+
 
     def __repr__(self):
         return '<%s %s>' % ( self.__class__.__name__, self.full_name) #pragma: nocover
