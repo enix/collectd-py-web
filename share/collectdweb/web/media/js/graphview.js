@@ -115,7 +115,6 @@
                 return ;
             }
             this.$('img').attr('src', this.getImgSrc());
-            console.log( this.$('img').attr('src'))
         },
         getImgSrc: function() {
             var linker = this.src.indexOf('?') !== -1 ? '&' : '?';

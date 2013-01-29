@@ -32,7 +32,6 @@
             this.setElement( '#slide-menu-container');
             this.$('#menu-tabs').tabs();
             this.options = new OptionsTab();
-            this.clocks = new ClockTab();
         },
         slide: function(ev) {
             this.$('#slide-menu-content').slideToggle('fast');
@@ -163,59 +162,6 @@
             return false;
         }
     });
-
-    var ClockTab = Backbone.View.extend({
-        initialize: function() {
-            this.setElement('#clocks-tab');
-            this.$('#clock').jclock();
-            Backbone.ajax( '/time/').done( this.gotTZ.bind( this));
-            this.serverTZ = 0;
-        },
-        gotTZ: function( data) {
-            this.serverTZ = parseInt(data.tz, 10);
-            this.$("#clock-server").jclock({
-                utc: true,
-                utcOffset: this.serverTZ
-            });
-        }
-    });
-        /*
-           function get_gmt(offset) {
-           off = '';
-           if (offset == 0) {
-           off = '';
-           } else if (offset > 0) {
-           off = '+' + offset
-           } else {
-           off = offset
-           }
-           return offset
-           }
-           $("#clock-server-slider").slider({
-min: -12,
-max: 12,
-step: 0.5,
-change: function (event, ui) {
-$('#clock-server-gmt').html(get_gmt(ui.value));
-}
-});
-
-$('#clock-server-add').submit(function () {
-var offset = parseInt($('#clock-server-gmt').html());
-var new_span = $(document.createElement("span"));
-var new_li = $(document.createElement("li"));
-new_span.jclock({
-format: '%H:%M',
-utc: true,
-utcOffset: offset
-});
-$(new_span).appendTo(new_li);
-new_li.append(' ' + $('#clock-server-add-label').val());
-$(new_li).appendTo('#new-clock-container');
-return false;
-});
-*/
-
     var Ruler = Backbone.View.extend({
         initialize: function() {
             this.setElement('#ruler');
