@@ -38,21 +38,31 @@ class FakeGraph(object):
         return open( self.error_file, 'rb')
 
 class RrdCommand( object):
-    def __init__(self, args):
+    job_no = 0
+    def __init__(self, args, env=None):
+        self.__class__.job_no += 1
+        self.job_no = self.job_no
         command = [ 'rrdtool' ]
         command.extend( args)
         self.process = subprocess.Popen( command,
+                env=env,
                 stdin=open('/dev/null'),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
-        error = self.process.stderr.read()
-        if error:
-            raise ValueError, error
 
     def __iter__(self):
-        for x in self.process.stdout:
-            yield x
-        self.process.wait()
+        try:
+            once=False
+            for x in self.process.stdout:
+                yield x
+                once=True
+
+            if not once:
+                err = self.process.stderr.read()
+                if err:
+                    raise ValueError, err
+        finally:
+            self.process.wait()
 
 class BaseGraph( object):
     DEFAULT_OPTIONS = [
@@ -77,6 +87,32 @@ class BaseGraph( object):
             for option_pair in options.iteritems():
                 self.opts.extend( option_pair)
 
+    def get_max(self, sources, start, end):
+        maxes = defaultdict( lambda :float('-inf'))
+        for plugin, instance, file in sources:
+            maxes = dict( (key, max( value, maxes[key] ))
+                    for key, value in self._get_max( file, start, end) )
+        return maxes
+
+    def _get_max(self, file, start, end):
+        command = RrdCommand([ 'fetch', file, 'AVERAGE',
+            '-s', start,
+            '-e', end,
+            ], env={
+                'LC_ALL': 'C'
+                })
+        output = iter( command)
+        header = next( output)
+        labels = filter( bool, header.strip().split(' '))
+        maxes = [ float('-inf')] * len( labels)
+        for line in output:
+            line = line.strip()
+            if not line:
+                continue
+            values = map( float, filter( bool, line.split(':',1)[1].split(' ')))
+            maxes = [ max(x,y) for x,y in  zip( maxes, values ) ]
+        return zip( labels, maxes)
+
     def dump(self, out, name):
         out.write('%s %s\n' % ( self.__class__.__name__, name ))
         opts = iter( self.opts)
@@ -84,6 +120,7 @@ class BaseGraph( object):
             out.write( '    %s : "%s"\n' % (param, value))
 
     def build( self, title, sources, start, end=None, format=None, upper=None):
+        #sources: [ [ plugin, instance, file ] ... ]
         args = [
                 'graph',
                 '-',
@@ -190,18 +227,17 @@ class MetaGraph( BaseGraph):
     def get_args(self, all_sources):
         args = []
         data_sources = defaultdict(list)
-        for sources in all_sources:
-            for plugin, inst_name, file in sources:
-                data_sources[ inst_name].append(plugin)
-                args.extend( x.format(
-                    inst_name=inst_name + '-' + plugin,
-                    file=file
-                    )
-                    for x in [
-                        r'DEF:{inst_name}_min={file}:value:MIN',
-                        r'DEF:{inst_name}_avg={file}:value:AVERAGE',
-                        r'DEF:{inst_name}_max={file}:value:MAX',
-                        ])
+        for plugin, inst_name, file in all_sources:
+            data_sources[ inst_name].append(plugin)
+            args.extend( x.format(
+                inst_name=inst_name + '-' + plugin,
+                file=file
+                )
+                for x in [
+                    r'DEF:{inst_name}_min={file}:value:MIN',
+                    r'DEF:{inst_name}_avg={file}:value:AVERAGE',
+                    r'DEF:{inst_name}_max={file}:value:MAX',
+                    ])
 
         for instance, sources in data_sources.items():
             for dim in [ 'min', 'avg', 'max' ]:

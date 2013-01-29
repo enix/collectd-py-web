@@ -177,7 +177,20 @@ class Graph(RRDObject):
                 )
 
     def generate(self, start, end, **kw):
-        return self.graphdef.build( self.title, self.rrd_source(), start, end, **kw)
+        sources = self.rrd_source()
+        upper = kw.get( 'upper')
+        if upper and upper[-1] == '%':
+            try:
+                upper = float(upper[:-1])
+            except ValueError:
+                raise ValueError, 'Invalid value for upper: %s' % upper
+            maximum = self.graphdef.get_max( sources, start, end)
+            upperlimit = max( maximum.values()) * upper / 100
+            kw['upper'] = str( upperlimit)
+        return self.graphdef.build( self.title, sources, start, end, **kw)
+
+    def calculate_max(self, start, end):
+        return self.graphdef.get_max( self.rrd_source(), start, end)
 
     def rrd_source(self):
         if not self._is_multiple_files():
@@ -187,8 +200,8 @@ class Graph(RRDObject):
                     ]
         else:
             return [
-                    [ (  plugin, instance, collectd.get_file( prefix_plugin + '/' + self.name + '-' + instance + '.rrd' ))
-                        for instance in self.instance ]
+                    (  plugin, instance, collectd.get_file( prefix_plugin + '/' + self.name + '-' + instance + '.rrd' ))
+                    for instance in self.instance
                     for plugin, prefix_plugin in self.plugin.rrd_source()
                     ]
 
