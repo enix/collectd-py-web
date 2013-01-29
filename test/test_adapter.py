@@ -25,7 +25,7 @@ class TestAdapter(unittest.TestCase):
                 set([ 'host1', 'host2', 'host3']) )
 
     def test_plugin(self):
-        self.assertEquals( set(self.adapter.get_plugins_of( 'host2')),
+        self.assertEquals( set(self.adapter.get_plugins_of([ 'host2' ])),
                 set([
                     ( 'interface', 'eth0'),
                     ( 'interface', 'eth1'),
@@ -35,7 +35,7 @@ class TestAdapter(unittest.TestCase):
                     ]))
 
     def test_graphs(self):
-        self.assertEquals( set(self.adapter.get_graphes_of( 'host2', 'interface-eth0')),
+        self.assertEquals( set(self.adapter.get_graphes_of([ 'host2/interface-eth0' ])),
                 set([
                     ('if_packets', None),
                     ('if_errors', None),
@@ -58,7 +58,7 @@ class TestAdadpterEdgeCase(unittest.TestCase):
     
     def test_errors(self):
         self.adapter = Collectd( '/home/cecedille1/enix/collectd-py-web/test/fixtures/collection.conf')
-        self.assertEquals( set(self.adapter.get_plugins_of( 'host3')),
+        self.assertEquals( set(self.adapter.get_plugins_of([ 'host3' ])),
                 set())
 
     def test_inexisting_file(self):

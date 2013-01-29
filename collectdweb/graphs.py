@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import subprocess
-from colors import Color
+from collections import defaultdict
+
+from gevent import subprocess
+from collectdweb.colors import Color
 from collectdweb import get_shared
 
 #Generer les graphes de cpu-*
@@ -40,9 +42,6 @@ class RrdCommand( object):
         command = [ 'rrdtool' ]
         command.extend( args)
         self.process = subprocess.Popen( command,
-                env={
-                    'TZ' : 'UTC'
-                    },
                 stdin=open('/dev/null'),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
@@ -110,10 +109,37 @@ class Graph( BaseGraph):
         super( Graph, self).__init__( opts)
         self.definition = definition
 
-    def get_args(self, source):
-        instance_name, file = source
-        return [ x.format( file=file)
-                for x in self.definition ]
+    def file_definition(self):
+        return [ x for x in self.definition if x.startswith('DEF:') ]
+
+    def graph_definition(self):
+        return [ x for x in self.definition if not x.startswith('DEF:') ]
+
+    def get_args(self, sources):
+        args=[]
+        if len( sources) == 1:
+            a, b, file = sources[0]
+            args.extend([ x.format( file=file) for x in self.file_definition() ])
+        else:
+            for definition in self.file_definition():
+                DEF,name,variable,reduction = definition.split(':')
+                name,file = name.split('=')
+                for plugin, instance_name, file in sources:
+                    args.append( 'DEF:{name}_{instance}={file}:{variable}:{reduction}'.format(
+                        name=name,
+                        instance= plugin+'-'+instance_name,
+                        file=file,
+                        variable=variable,
+                        reduction=reduction))
+
+                args.append('CDEF:{name}={instances},{pluses}'.format(
+                    name=name,
+                    instances=','.join( name+'_'+p+'-'+i for p,i,f in sources ),
+                    pluses=','.join( 'ADDNAN' for x in xrange( len( sources) - 1 ))
+                    ))
+        args.extend( self.graph_definition())
+        return args
+
 
     def dump(self, out, name):
         super( Graph, self).dump( out, name)
@@ -159,30 +185,45 @@ class MetaGraph( BaseGraph):
         if not self.types:
             return list( sources)
         else:
-            instances = dict( sources)
-            sources_ = list()
-            for type in reversed( self.types):
-                if type in instances:
-                    sources_.append(( type, instances[type]))
-            return sources_
+            return [ type for type in reversed( self.types) if type in sources ]
 
-    def get_args(self, sources):
+    def get_args(self, all_sources):
         args = []
-        sources = self.sort_sources(sources)
-        for inst_name, file in sources:
-            args.extend( x.format( inst_name=inst_name, file=file)
+        data_sources = defaultdict(list)
+        for sources in all_sources:
+            for plugin, inst_name, file in sources:
+                data_sources[ inst_name].append(plugin)
+                args.extend( x.format(
+                    inst_name=inst_name + '-' + plugin,
+                    file=file
+                    )
                     for x in [
                         r'DEF:{inst_name}_min={file}:value:MIN',
                         r'DEF:{inst_name}_avg={file}:value:AVERAGE',
                         r'DEF:{inst_name}_max={file}:value:MAX',
-                        r'CDEF:{inst_name}_nnl={inst_name}_avg,UN,0,{inst_name}_avg,IF',
                         ])
 
-        instance_names = [ x[0] for x in sources ]
-        args.append( 'CDEF:{inst_name}_stk={inst_name}_nnl'.format(
+        for instance, sources in data_sources.items():
+            for dim in [ 'min', 'avg', 'max' ]:
+                if len(sources) > 1:
+                    args.append( r'CDEF:{inst_name}_{dim}={sources},{pluses}'.format(
+                        inst_name=instance,
+                        dim=dim,
+                        sources=','.join(instance+'-'+ source+'_'+dim for source in sources),
+                        pluses=','.join( 'ADDNAN' for x in xrange( len( sources) - 1))
+                        ))
+                else:
+                    args.append( r'CDEF:{inst_name}_{dim}={source},UN,0,{source},IF'.format(
+                        inst_name=instance,
+                        dim=dim,
+                        source=instance+ '-' + sources[0] + '_' + dim
+                        ))
+
+        instance_names = self.sort_sources( data_sources)
+        args.append( 'CDEF:{inst_name}_stk={inst_name}_avg'.format(
             inst_name=instance_names[0]
             ))
-        args.extend( 'CDEF:{name}_stk={name}_nnl,{previous_name}_stk,+'.format(
+        args.extend( 'CDEF:{name}_stk={name}_avg,{previous_name}_stk,+'.format(
             previous_name=previous_name,
             name=name)
             for previous_name, name in zip( instance_names, instance_names[1:] ) )

@@ -30,11 +30,15 @@ class PluginManager( object):
     def __init__(self, host):
         self.host = host
     def __iter__(self):
-        return iter( collectd.get_plugins_of( self.host.name ))
+        return iter( collectd.get_plugins_of([ self.host.name ]))
     def all(self):
         return [ Plugin( self.host, name, instance ) for name, instance in self ]
     def get(self, plugin, plugin_instance=None):
-        if (plugin, plugin_instance) in self:
+        if plugin_instance == '*':
+            instances = [ instance for name,instance in self if name == plugin and plugin_instance ]
+            if instances:
+                return Plugin( self.host, plugin, instances)
+        elif (plugin, plugin_instance) in self:
             return Plugin( self.host, plugin, plugin_instance)
         raise Plugin.DoesNotExist, plugin + (
                 '-' + plugin_instance if plugin_instance else '' )
@@ -43,7 +47,7 @@ class GraphManager( object):
     def __init__(self, plugin):
         self.plugin = plugin
     def __iter__(self):
-        sources = collectd.get_graphes_of( self.plugin.host.name, self.plugin.get_filename())
+        sources = collectd.get_graphes_of([ path for name, path in self.plugin.rrd_source() ])
         graphes = defaultdict(list)
 
         for graph, instance in sources:
@@ -94,11 +98,29 @@ class Host(object):
     def __repr__(self):
         return '<Host %s>' % self.name #pragma: no cover
 
-class Plugin(object):
+class RRDObject(object):
+    def __init__(self, name, instance):
+        self.name = name
+        self.instance = ( instance
+                if instance is None or isinstance( instance, basestring)
+                else frozenset( instance))
+
+    def _has_no_instance(self):
+        return self.instance is None
+    def _is_single_file(self):
+        return isinstance( self.instance, basestring)
+
+    @property
+    def full_name(self):
+        return self.name + ( '-' + self.instance if self._is_single_file() else '')
+
+    def __repr__(self):
+        return '<%s %s>' % ( self.__class__.__name__, self.full_name) #pragma: nocover
+
+class Plugin(RRDObject):
     def __init__(self, host, plugin, plugin_instance):
+        super( Plugin, self).__init__( plugin, plugin_instance)
         self.host = host
-        self.name = plugin
-        self.instance = plugin_instance
 
     @property
     def graphes(self):
@@ -107,18 +129,16 @@ class Plugin(object):
     class DoesNotExist( DoesNotExist):
         pass
 
-    @property
-    def full_name(self):
-        return self.name + ( '-' + self.instance if self.instance else '')
+    def rrd_source(self):
+        prefix = self.host.get_path() + '/'
+        if self._is_single_file() or self._has_no_instance():
+            return [ ('', prefix + self.full_name) ]
+        else:
+            return [ ( instance, prefix + self.name + '-' + instance) for instance in self.instance ]
 
     @property
     def title(self):
         return self.host.name + '/' + self.full_name
-
-    def get_path( self):
-        return self.host.get_path() + '/' + self.get_filename()
-    def get_filename( self):
-        return self.name + ( '-' + self.instance if self.instance else '' )
 
     def __hash__(self):
         return hash( (self.name, self.instance))
@@ -129,29 +149,15 @@ class Plugin(object):
                 self.instance == other.instance )
     def __ne__(self, other):
         return not (self == other)
-    def __repr__(self):
-        return '<Plugin %s %s>' % ( self.name, self.instance or '') #pragma: nocover
 
-class Graph(object):
+class Graph(RRDObject):
     def __init__(self, plugin, type_, type_instance):
+        super( Graph, self).__init__( type_, type_instance)
         self.plugin = plugin
-        self.name = type_
         self.graphdef = GRAPHS.get( self.name)
-        self.instance = ( type_instance
-                if type_instance is None or isinstance( type_instance, basestring)
-                else  frozenset( type_instance))
-
-    def _has_no_instance(self):
-        return self.instance is None
-    def _is_single_file(self):
-        return isinstance( self.instance, basestring)
 
     class DoesNotExist( DoesNotExist):
         pass
-
-    @property
-    def full_name(self):
-        return self.name + ( '-' + self.instance if self._is_single_file() else '')
 
     @property
     def title(self):
@@ -164,23 +170,17 @@ class Graph(object):
         return self.graphdef.build( self.title, self.rrd_source(), start, end, **kw)
 
     def rrd_source(self):
-        prefix_plugin = self.plugin.get_path() + '/'
-        if self._has_no_instance():
-            return ( self.name, collectd.get_file( prefix_plugin + self.name + '.rrd'))
-        if self._is_single_file():
-            graph_name = self.name + '-' + self.instance
-            return ( graph_name, collectd.get_file( prefix_plugin + graph_name + '.rrd'))
-
-        return [ ( instance, collectd.get_file( prefix_plugin + self.name + '-' + instance + '.rrd' ))
-                for instance in self.instance ]
-
-    def __repr__(self):
-        return '<Graph %s %s>' % (
-                self.name,
-                self.instance
-                if self.instance and self.graphdef.list_type_instances
-                else ''
-                )
+        if self._has_no_instance() or self._is_single_file():
+            return [
+                    ( plugin, self.full_name, collectd.get_file( prefix_plugin + '/' + self.full_name + '.rrd'))
+                    for plugin, prefix_plugin in self.plugin.rrd_source()
+                    ]
+        else:
+            return [
+                    [ (  plugin, instance, collectd.get_file( prefix_plugin + '/' + self.name + '-' + instance + '.rrd' ))
+                        for instance in self.instance ]
+                    for plugin, prefix_plugin in self.plugin.rrd_source()
+                    ]
 
     def __hash__(self):
         return hash(( self.name, self.plugin, self.instance))

@@ -8,32 +8,6 @@ def pad( lst, n):
     lst.extend( None for x in xrange(len(lst), n))
     return tuple( lst)
 
-def get_dirs_inside( dirnames):
-    for dirname in dirnames:
-        try:
-            listing = os.listdir( dirname)
-        except OSError:
-            continue
-        for entry in listing:
-            if entry[0] == '.':
-                continue
-            path = os.path.join( dirname, entry)
-            if os.path.isdir( path):
-                yield path, entry
-
-def get_rrd_inside( dirname):
-    try:
-        listing = os.listdir( dirname)
-        for entry in listing:
-            if entry[0] == '.':
-                continue
-            if not entry.endswith( '.rrd'):
-                continue
-            yield entry
-    except OSError:
-        pass
-
-
 class Collectd( object):
     def __init__(self, config_file):
         self.filename = config_file
@@ -77,37 +51,39 @@ class Collectd( object):
         self.load_config_file()
         return self._libdirs
 
+    def get_inside( self, dirnames):
+        for datadir in self.datadirs:
+            for dirname in dirnames:
+                try:
+                    listing = os.listdir( os.path.join( datadir,  dirname))
+                except OSError:
+                    continue
+                for entry in listing:
+                    if entry[0] == '.':
+                        continue
+                    path = os.path.join( datadir, dirname, entry)
+                    yield path, entry
+    def get_dirs_inside( self, dirnames):
+        for path, entry in self.get_inside( dirnames):
+            if os.path.isdir( path):
+                yield entry
+
+    def get_rrd_inside( self, dirnames):
+        for path, entry in self.get_inside( dirnames):
+            if os.path.isfile( path) and entry.endswith( '.rrd'):
+                yield entry
+
     def get_all_hosts(self):
-        return set( name for path,name in get_dirs_inside( self.datadirs ))
+        return set( name
+                for name in self.get_dirs_inside(['']))
 
-    def get_plugins_of(self, host):
-        return set(
-                pad( name.split('-',1), 2)
-                for path, name  in self._get_plugins_instances( host))
+    def get_plugins_of(self, hosts ):
+        return set( pad( name.split('-',1), 2)
+                for name  in self.get_dirs_inside( hosts ))
 
-    def _get_plugins_instances( self, host):
-        return ( ( path,name)
-                for path, name in get_dirs_inside(
-                    os.path.join( datadir, host)
-                    for datadir in self.datadirs
-                    )
-                )
-
-    def _get_types(self, host, plugins):
-        plugins = set( plugins)
-        for path, name in self._get_plugins_instances( host):
-            if name not in plugins:
-                continue
-
-            for rrd_file in get_rrd_inside( path):
-                type_ = rrd_file.rsplit('.',1)[0]
-                yield path, rrd_file, type_
-
-    def get_graphes_of( self, host, plugin):
-        return set( pad(type.split('-', 1), 2)
-                for (path, rrd_file, type) in 
-                self._get_types( host, [ plugin ])
-                )
+    def get_graphes_of( self, plugins ):
+        return set( pad(graph.rsplit('.',1)[0].split('-', 1), 2)
+                for graph in self.get_rrd_inside( plugins))
 
     def get_file(self, relative_path):
         for datadir in self.datadirs:

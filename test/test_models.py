@@ -158,17 +158,17 @@ class TestGraph(unittest.TestCase):
 
     def test_rrd_single_instance(self):
         self.assertEquals( Graph( self.irqs, 'irq', '3').rrd_source(),
-                ( 'irq-3', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host1/irq/irq-3.rrd')
+                [ ( 'irq-3', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host1/irq/irq-3.rrd') ]
                 )
 
     def test_rrd_source_multi_instance(self):
-        self.assertEquals( Graph( self.memory, 'memory', [ 'free', 'used'] ).rrd_source(), [
+        self.assertEquals( Graph( self.memory, 'memory', [ 'free', 'used'] ).rrd_source(), [ [
                 ( 'used', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/memory/memory-used.rrd'),
                 ( 'free', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/memory/memory-free.rrd'),
-                ])
+                ] ])
     def test_rrd_source(self):
         self.assertEquals( Graph( self.eth0, 'if_packets', None).rrd_source(),
-                ( 'if_packets', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/interface-eth0/if_packets.rrd' )
+                [ ( 'if_packets', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/interface-eth0/if_packets.rrd' ) ]
         )
 
 

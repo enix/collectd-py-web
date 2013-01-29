@@ -1,33 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
-import re
 import bottle
 
-from .models import Host, Plugin, Graph
-
-class DumpInJSON( object):
-    api = 2
-    name='dump_json'
-    def apply(self, callback, route):
-        def inner( **kw):
-            result = callback( **kw)
-            if ( result is None or
-                    isinstance( result, bottle.HTTPResponse) or
-                    result is bottle.response
-                    ):
-                return result
-            bottle.response.set_header( 'content_type', 'application/json')
-            return json.dumps( result)
-        return inner
+from collectdweb.models import Host, Plugin, Graph
+from collectdweb.plugins import DumpInJSON, Signature
 
 dump_json =  DumpInJSON()
+signature = Signature()
 
 @bottle.route('/hosts/', apply=dump_json)
 def list_hosts():
     return Host.objects.names()
-
 
 @bottle.route('/hosts/<host_name>/', apply=dump_json)
 def list_plugins( host_name):
@@ -37,16 +21,23 @@ def list_plugins( host_name):
     except Host.DoesNotExist:
         raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
 
-@bottle.route('/hosts/<host_name>/<plugin_name>/', apply=dump_json)
-def list_graphs( host_name, plugin_name):
+def split( name):
+    return name.split( '-', 1) if '-' in name else ( name, None)
+
+@bottle.route('/hosts/<host_name>/<plugin>/', apply=dump_json)
+def list_graphs( host_name, plugin):
+    plugin_name, plugin_instance = split( plugin)
     try:
-        plugins = [ plugin 
-                for plugin in Host.objects.get( host_name).plugins.all()
-                if plugin.name == plugin_name ]
+        if plugin_instance is None:
+            plugins = [ plugin 
+                    for plugin in Host.objects.get( host_name).plugins.all()
+                    if plugin.name == plugin_name ]
+        else:
+            plugins = [ Host.objects.get( host_name).plugins.get(plugin_name, plugin_instance) ]
     except Host.DoesNotExist:
         raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
     except Plugin.DoesNotExist:
-        raise bottle.HTTPError( 404, 'Plugin %s does not exist' % plugin_name)
+        plugins = []
 
     plugins.sort( key=lambda x:x.instance)
     graphes = []
@@ -56,11 +47,18 @@ def list_graphs( host_name, plugin_name):
     return [ get_url( graph) for graph in graphes ]
 
 def get_url( graph):
-    return '/hosts/{host}/{plugin}/{graph_name}.png'.format(
+    return '/graph/{host}/{plugin}/{graph_name}.png'.format(
             host = graph.plugin.host.name,
             plugin = graph.plugin.full_name,
             graph_name = graph.full_name
             )
+
+@bottle.route('/sign/<path:path>', apply=dump_json)
+def get_sign( path):
+    url = '/exports/' + path
+    return {
+            'path' : url + '?sign='+ signature.sign( url)
+            }
 
 
 SUPPORTED_FORMATS = {
@@ -69,11 +67,12 @@ SUPPORTED_FORMATS = {
         'svg': 'image/svg+xml',
         'png': 'image/png'
         }
-@bottle.route('/hosts/<host_name>/<plugin_name>/<type>.png')
-@bottle.route('/hosts/<host_name>/<plugin_name>/<type>-<type_instance>.png')
-@bottle.route('/hosts/<host_name>/<plugin_name>-<plugin_instance>/<type>.png')
-@bottle.route('/hosts/<host_name>/<plugin_name>-<plugin_instance>/<type>-<type_instance>.png')
-def show_graph( host_name, plugin_name, type, plugin_instance=None, type_instance=None):
+@bottle.route('/graph/<host_name>/<plugin>/<type>.png')
+@bottle.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=signature)
+def show_graph( host_name, plugin, type ):
+    plugin_name, plugin_instance = split( plugin)
+    type_name, type_instance = split( type)
+
     try:
         graph = Host.objects.get( host_name
                 ).plugins.get( plugin_name, plugin_instance
