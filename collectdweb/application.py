@@ -5,6 +5,7 @@ import bottle
 
 from collectdweb.models import Host, Plugin, Graph
 from collectdweb.plugins import DumpInJSON, Signature
+from collectdweb import get_shared
 
 dump_json =  DumpInJSON()
 signature = Signature()
@@ -41,6 +42,25 @@ def get_url( graph):
             plugin = graph.plugin.full_name,
             graph_name = graph.full_name
             )
+
+def make_image(text,format):
+    from cStringIO import StringIO
+    try:
+        import PIL.Image
+        import PIL.ImageDraw
+    except ImportError:
+        if format != 'png':
+            raise ValueError, 'Errors image are generated in png only'
+        return open( get_shared('icons/error.png'), 'rb')
+
+    image = PIL.Image.new('RGB', (700, 40), '#003499' )
+    canvas = PIL.ImageDraw.Draw( image)
+    canvas.text((0,0), text, fill='#ffffff')
+
+    out = StringIO()
+    image.save( out, format)
+    out.seek(0)
+    return out
 
 @bottle.route('/hosts/', apply=dump_json)
 def list_hosts():
@@ -121,8 +141,12 @@ def show_graph( host_name, plugin, type ):
 
     try:
         image = graph.generate( start, end, format=format, upper=upper)
+    except Graph.NoDefinition, e:
+        bottle.response.status = 400
+        image = make_image( 'No Graph definition for %s' % str(e), format)
     except ValueError, e:
-        raise bottle.HTTPError( 400, e)
+        bottle.response.status = 400
+        image = make_image( str(e), format)
 
     content_type = SUPPORTED_FORMATS[format]
     bottle.response.set_header( 'Content-type', content_type)

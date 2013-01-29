@@ -5,7 +5,6 @@ from collections import defaultdict
 
 from gevent import subprocess
 from collectdweb.colors import Color
-from collectdweb import get_shared
 
 #Generer les graphes de cpu-*
 
@@ -22,20 +21,12 @@ class Library(object):
 
     def get(self, graph_name):
         graph_name = self.aliases.get( graph_name, graph_name)
-        return ( self.graphes.get( graph_name) or FakeGraph())
+        return self.graphes.get( graph_name)
     def dump(self, out):
         for name, graph in self.graphes.items():
             graph.dump( out, name)
         for alias, target in self.aliases.items():
             out.write( 'ALIAS %s = %s\n'% ( alias, target))
-
-class FakeGraph(object):
-    list_type_instances = True
-    error_file = get_shared( 'icons/error.png')
-    def build( self, title, sources, start, end, format=None, **kw):
-        if format is not None and format != 'png':
-            raise ValueError, 'Errors are only disponible in PNG'
-        return open( self.error_file, 'rb')
 
 class RrdCommand( object):
     job_no = 0

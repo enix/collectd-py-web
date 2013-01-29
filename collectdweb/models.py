@@ -168,6 +168,8 @@ class Graph(RRDObject):
 
     class DoesNotExist( DoesNotExist):
         pass
+    class NoDefinition( Exception):
+        pass
 
     @property
     def title(self):
@@ -177,6 +179,8 @@ class Graph(RRDObject):
                 )
 
     def generate(self, start, end, **kw):
+        if not self.graphdef:
+            raise self.NoDefinition, self.name
         sources = self.rrd_source()
         upper = kw.get( 'upper')
         if upper and upper[-1] == '%':
@@ -190,6 +194,8 @@ class Graph(RRDObject):
         return self.graphdef.build( self.title, sources, start, end, **kw)
 
     def calculate_max(self, start, end):
+        if not self.graphdef:
+            raise self.NoGraph
         return self.graphdef.get_max( self.rrd_source(), start, end)
 
     def rrd_source(self):
