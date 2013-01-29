@@ -25,13 +25,16 @@
             'click .ui-icon-close' : 'close',
             'click .ui-icon-star' : 'toggleSelected',
             'click .ui-icon-disk' : 'output',
-            'click .ui-icon-bookmark' : 'exportLink' 
+            'click .ui-icon-bookmark' : 'exportLink',
+            'click .ui-icon-arrowstop-1-n': 'augmentUpper',
+            'click .ui-icon-arrowstop-1-s': 'reduceUpper'
         },
         initialize : function( opts ) {
             this.lazy = opts.lazy;
             this.src = opts.url;
             this.end = opts.end || new Date();
             this.start = opts.start || addTime( this.end, -1, 'hour');
+            this.upper = null;
         },
         template: Mustache.compile(
             '<span class="gc-menu fg-toolbar ui-widget-header ui-corner-all ui-helper-clearfix" >' +
@@ -43,6 +46,8 @@
             '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-star"></span></span>' +
             '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-close"></span></span>' +
             '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-bookmark"></span></span>' +
+            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-arrowstop-1-n"></span></span>' +
+            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-arrowstop-1-s"></span></span>' +
             '</span>' +
             '<span class="selectable"></span>' +
             '<img class="gc-img" src="{{ url }}" title="{{url}}" />'
@@ -73,6 +78,12 @@
         zoomOut: function() {
             this._zoom( -1);
         },
+        augmentUpper: function() {
+            this._upper( 1);
+        },
+        reduceUpper: function() {
+            this._upper( -1);
+        },
         _getInterval: function() {
             var start_millis = this.start.getTime();
             var end_millis = this.end.getTime();
@@ -89,17 +100,30 @@
             this.start = addTime( this.start, zoom );
             this._update();
         },
+        _upper: function( delta) {
+            if ( this.upper === null ){
+                this.upper = 10000;
+            }
+            this.upper += Math.ceil( this.upper * delta * (10 / 100));
+            if ( Math.abs(this.upper - 10000) < 500) {
+                this.upper = null;
+            }
+            this._update();
+        },
         _update: function() {
             if ( this.lazy) {
                 return ;
             }
             this.$('img').attr('src', this.getImgSrc());
+            console.log( this.$('img').attr('src'))
         },
         getImgSrc: function() {
             var linker = this.src.indexOf('?') !== -1 ? '&' : '?';
             return ( this.src + linker +
                     'start=' + this._getFormated( this.start) +
-                    '&end=' + this._getFormated( this.end ));
+                    '&end=' + this._getFormated( this.end ) +
+                    ( this.upper !== null ? '&upper=' + (this.upper/100).toFixed() + '%' : '')
+                   );
         },
         toggleSelected: function() {
             this.trigger( 'select', this);
