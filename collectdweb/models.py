@@ -109,15 +109,14 @@ class RRDObject(object):
         return self.instance is None
     def _is_single_file(self):
         return isinstance( self.instance, basestring)
+    def _is_multiple_files(self):
+        return isinstance( self.instance, frozenset)
 
     @property
     def full_name(self):
-        return self.name + ( ''
-                if self._has_no_instance() else
-                '-' + self.instance
+        return self.name + ( '-' + self.instance
                 if self._is_single_file() else
-                '-*')
-
+                '')
 
     def __repr__(self):
         return '<%s %s>' % ( self.__class__.__name__, self.full_name) #pragma: nocover
@@ -128,6 +127,12 @@ class Plugin(RRDObject):
         self.host = host
 
     @property
+    def full_name(self):
+        return super( Plugin, self).full_name + ( ''
+                if not self._is_multiple_files() else
+                '-*')
+
+    @property
     def graphes(self):
         return GraphManager( self)
 
@@ -136,7 +141,7 @@ class Plugin(RRDObject):
 
     def rrd_source(self):
         prefix = self.host.get_path() + '/'
-        if self._is_single_file() or self._has_no_instance():
+        if not self._is_multiple_files():
             return [ ('', prefix + self.full_name) ]
         else:
             return [ ( instance, prefix + self.name + '-' + instance) for instance in self.instance ]
@@ -175,7 +180,7 @@ class Graph(RRDObject):
         return self.graphdef.build( self.title, self.rrd_source(), start, end, **kw)
 
     def rrd_source(self):
-        if self._has_no_instance() or self._is_single_file():
+        if not self._is_multiple_files():
             return [
                     ( plugin, self.full_name, collectd.get_file( prefix_plugin + '/' + self.full_name + '.rrd'))
                     for plugin, prefix_plugin in self.plugin.rrd_source()

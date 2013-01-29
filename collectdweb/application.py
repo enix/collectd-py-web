@@ -74,6 +74,9 @@ def list_graphs( host_name, plugin):
     for plugin in plugins:
         graphes.extend( plugin.graphes.all() )
 
+    if len( plugins) > 1:
+        graphes.extend( host.plugins.get( plugin_name, '*').graphes.all() )
+
     return [ get_url( graph) for graph in graphes ]
 
 @bottle.route('/sign/<path:path>', apply=dump_json)
@@ -92,7 +95,7 @@ def show_graph( host_name, plugin, type ):
     try:
         graph = Host.objects.get( host_name
                 ).plugins.get( plugin_name, plugin_instance
-                ).graphes.get( type, type_instance)
+                ).graphes.get( type_name, type_instance)
     except Host.DoesNotExist:
         raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
     except Plugin.DoesNotExist:
