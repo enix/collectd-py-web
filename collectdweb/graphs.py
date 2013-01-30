@@ -29,10 +29,7 @@ class Library(object):
             out.write( 'ALIAS %s = %s\n'% ( alias, target))
 
 class RrdCommand( object):
-    job_no = 0
     def __init__(self, args, env=None):
-        self.__class__.job_no += 1
-        self.job_no = self.job_no
         command = [ 'rrdtool' ]
         command.extend( args)
         self.process = subprocess.Popen( command,
@@ -40,18 +37,17 @@ class RrdCommand( object):
                 stdin=open('/dev/null'),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
+        first = self.first = self.process.stdout.read(3)
+        if not first:
+            err = self.process.stderr.read()
+            if err:
+                raise ValueError, err
 
     def __iter__(self):
         try:
-            once=False
-            for x in self.process.stdout:
+            yield self.first
+            for x in self.process.stdout.read():
                 yield x
-                once=True
-
-            if not once:
-                err = self.process.stderr.read()
-                if err:
-                    raise ValueError, err
         finally:
             self.process.wait()
 
