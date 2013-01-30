@@ -4,3 +4,4 @@ syntax: glob
 venv
 .coverage
 .noseids
+build

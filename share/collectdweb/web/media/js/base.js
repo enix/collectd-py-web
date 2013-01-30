@@ -24,6 +24,15 @@
     var GraphView= window.GraphView;
     var addTime = window.addTime;
 
+    var getUrlPairs = function( list ) {
+        return _.map( list.sort(), function(url) {
+            return {
+                url: url,
+                name: _.chain( url.split('/')).compact().last().value()
+            };
+        });
+    };
+
     var MenuTabs = Backbone.View.extend({
         events : {
             'click #slide-menu-btn': 'slide'
@@ -66,7 +75,7 @@
         template : Mustache.compile(
             '{{#hosts}}' +
             '<li>' +
-            '<a href="{{.}}">{{ . }}</a>' +
+            '<a href="{{url}}">{{ name }}</a>' +
             '</li>' +
             '{{/hosts}}'
         ),
@@ -78,16 +87,14 @@
             this.setElement('#hosts');
             this.plugins = new PluginsView();
 
-            this.on('reset-plugins', this.plugins.reset, this.plugins);
-            this.on('got-plugins', this.plugins.gotPlugins, this.plugins);
-            this.plugins.on( 'select-plugin', this.selectPlugin, this);
+            this.plugins.on( 'got-graphes', this.gotGraphes, this);
 
             Backbone.ajax({
                 url : '/hosts/'
             }).done( this.gotHosts.bind( this));
         },
         gotHosts: function( hosts ) {
-            this.$('ul').empty().append( this.template({ hosts : hosts.sort() }));
+            this.$('ul').empty().append( this.template({ hosts : getUrlPairs( hosts) }));
         },
         filter: function(ev) {
             var target = $(ev.currentTarget);
@@ -112,23 +119,11 @@
 
             var target = $(ev.currentTarget);
             target.addClass('selected');
-            var host  = target.attr('href');
+            var host = target.attr('href');
             this.host = host;
 
-            Backbone.ajax({
-                url: '/hosts/' + host + '/'
-            }).done( this.gotPlugins.bind( this));
-            this.trigger( 'reset-plugins');
+            this.plugins.listHost( host);
             return false;
-        },
-        gotPlugins: function( plugins ) {
-            this.trigger( 'got-plugins', plugins);
-            return false;
-        },
-        selectPlugin: function( plugin) {
-            Backbone.ajax({
-                url : '/hosts/' + this.host + '/' + plugin + '/'
-            }).done( this.gotGraphes.bind(this));
         },
         gotGraphes: function(graphes) {
             this.trigger( 'show-graphes', graphes);
@@ -146,20 +141,32 @@
             '<div class="ui-widget-header ui-corner-top"><h3>Available Plugins</h3></div>' +
             '<div id="plugin-container" class="ui-widget-content ui-corner-bottom  ">' +
             '<ul>{{#plugins}}' +
-            '<li><a href="{{.}}" >{{.}}</a></li>' +
+            '<li><a href="{{url}}" >{{name}}</a></li>' +
             '{{/plugins}}</ul>' +
             '</div>' +
             '</div>'
         ),
+        listHost: function( host ){
+            Backbone.ajax({
+                url: host
+            }).done( this.gotPlugins.bind( this));
+        },
         gotPlugins: function( plugins ) {
-            this.$el.empty().append( this.template({ plugins: plugins }));
+            this.$el.empty().append( this.template({ plugins: getUrlPairs( plugins) }));
         },
         selectPlugin: function(ev) {
             var target = $(ev.currentTarget);
             this.$('a').removeClass('selected');
             target.addClass('selected');
-            this.trigger( 'select-plugin', target.attr('href'));
+
+            var url = target.attr('href');
+            Backbone.ajax({
+                url : url
+            }).done( this.gotGraphes.bind(this));
             return false;
+        },
+        gotGraphes: function( graphes ) {
+            this.trigger('got-graphes', graphes);
         }
     });
     var Ruler = Backbone.View.extend({

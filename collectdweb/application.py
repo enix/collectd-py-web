@@ -5,7 +5,7 @@ import bottle
 
 from collectdweb.models import Host, Plugin, Graph
 from collectdweb.plugins import DumpInJSON, Signature
-from collectdweb import get_shared
+from collectdweb.error import make_image
 
 dump_json =  DumpInJSON()
 signature = Signature()
@@ -43,38 +43,21 @@ def get_url( graph):
             graph_name = graph.full_name
             )
 
-def make_image(text,format):
-    from cStringIO import StringIO
-    try:
-        import PIL.Image
-        import PIL.ImageDraw
-    except ImportError:
-        if format != 'png':
-            raise ValueError, 'Errors image are generated in png only'
-        return open( get_shared('icons/error.png'), 'rb')
+app = bottle.Bottle()
 
-    image = PIL.Image.new('RGB', (700, 40), '#003499' )
-    canvas = PIL.ImageDraw.Draw( image)
-    canvas.text((0,0), text, fill='#ffffff')
-
-    out = StringIO()
-    image.save( out, format)
-    out.seek(0)
-    return out
-
-@bottle.route('/hosts/', apply=dump_json)
+@app.route('/hosts/', apply=dump_json)
 def list_hosts():
-    return Host.objects.names()
+    return [ '/hosts/%s/' % s for s in Host.objects.names() ]
 
-@bottle.route('/hosts/<host_name>/', apply=dump_json)
+@app.route('/hosts/<host_name>/', apply=dump_json)
 def list_plugins( host_name):
     try:
-        return list( set( x.name
-            for x in Host.objects.get( host_name).plugins.all() ))
+        return [ '/hosts/%s/%s/'% ( host_name, x) for x in set( x.name
+            for x in Host.objects.get( host_name).plugins.all() ) ]
     except Host.DoesNotExist:
         raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
 
-@bottle.route('/hosts/<host_name>/<plugin>/', apply=dump_json)
+@app.route('/hosts/<host_name>/<plugin>/', apply=dump_json)
 def list_graphs( host_name, plugin):
     plugin_name, plugin_instance = split( plugin)
     try:
@@ -101,7 +84,7 @@ def list_graphs( host_name, plugin):
 
     return [ get_url( graph) for graph in graphes ]
 
-@bottle.route('/sign/', apply=dump_json)
+@app.route('/sign/', apply=dump_json)
 def get_sign():
     urls = bottle.request.GET.getall( 'url')
     urls = ( '/export' + url for url in urls if url.startswith('/graph/') )
@@ -110,8 +93,8 @@ def get_sign():
              for url in urls
             ]
 
-@bottle.route('/graph/<host_name>/<plugin>/<type>.png')
-@bottle.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=signature)
+@app.route('/graph/<host_name>/<plugin>/<type>.png')
+@app.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=signature)
 def show_graph( host_name, plugin, type ):
     plugin_name, plugin_instance = split( plugin)
     type_name, type_instance = split( type)
@@ -152,7 +135,6 @@ def show_graph( host_name, plugin, type ):
     bottle.response.set_header( 'Content-type', content_type)
 
     return image
-
 
 if __name__ == '__main__':
     bottle.debug( True)
