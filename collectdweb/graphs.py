@@ -122,7 +122,7 @@ class BaseGraph( object):
 
         args.extend( self.DEFAULT_OPTIONS)
         args.extend( self.opts )
-        args.extend( self.get_args(sources))
+        args.extend( self.get_args( [ ( p.replace('.', '-'), i, f) for p, i, f in sources ]))
         
         graph = RrdCommand(args)
         return graph
