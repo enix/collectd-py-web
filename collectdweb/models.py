@@ -12,19 +12,22 @@ collectd = Collectd( settings.COLLECTD_CONFIG_FILE)
 GRAPHS = Parser().parse( open( get_shared( 'graph_definition'), 'rb'))
 
 class DoesNotExist(Exception):
-    pass
+    def __init__(self, model, name):
+        super( DoesNotExist, self).__init__( name)
+        self.model = model
+
+    def __str__(self):
+        return '%s %s does not exist' % ( self.model.__name__, self.message)
 
 class HostManager(object):
     def __iter__(self):
         return iter( collectd.get_all_hosts())
     def all( self):
         return [ Host(name) for name in self ]
-    def names(self):
-        return list(self)
     def get(self, name):
         if name in self:
             return Host( name)
-        raise Host.DoesNotExist, name
+        raise Host.DoesNotExist( Host, name)
 
 class PluginManager( object):
     def __init__(self, host):
@@ -40,8 +43,8 @@ class PluginManager( object):
                 return Plugin( self.host, plugin, instances)
         elif (plugin, plugin_instance) in self:
             return Plugin( self.host, plugin, plugin_instance)
-        raise Plugin.DoesNotExist, plugin + (
-                '-' + plugin_instance if plugin_instance else '' )
+        raise Plugin.DoesNotExist( Plugin, plugin + (
+                '-' + plugin_instance if plugin_instance else '' ))
 
 class GraphManager( object):
     def __init__(self, plugin):
@@ -72,12 +75,16 @@ class GraphManager( object):
             for type, type_instance in self:
                 if type == type_ and not isinstance(type_instance, basestring):
                     return Graph( self.plugin, type_, type_instance)
-        raise Graph.DoesNotExist, type_
+        raise Graph.DoesNotExist( Graph, type_)
 
 class Host(object):
     objects = HostManager()
     def __init__(self, name):
         self.name = name
+
+    @property
+    def full_name(self):
+        return self.name
 
     @property
     def plugins(self):

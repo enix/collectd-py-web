@@ -3,11 +3,11 @@
 
 import bottle
 
-from collectdweb.models import Host, Plugin, Graph
-from collectdweb.plugins import DumpInJSON, Signature
+from collectdweb.models import Host, Graph
+from collectdweb.plugins import DumpInJSON, Signature, Detect404
 from collectdweb.error import make_image
+from collectdweb.web_service import web_service, split
 
-dump_json =  DumpInJSON()
 signature = Signature()
 
 SUPPORTED_FORMATS = {
@@ -33,58 +33,11 @@ def _resolve_timespan( timespan_name, start, end):
     else:
         return '-' + str(timespan), ''
 
-def split( name):
-    return name.split( '-', 1) if '-' in name else ( name, None)
-
-def get_url( graph):
-    return '/graph/{host}/{plugin}/{graph_name}.png'.format(
-            host = graph.plugin.host.name,
-            plugin = graph.plugin.full_name,
-            graph_name = graph.full_name
-            )
 
 app = bottle.Bottle()
+app.merge( web_service )
 
-@app.route('/hosts/', apply=dump_json)
-def list_hosts():
-    return [ '/hosts/%s/' % s for s in Host.objects.names() ]
-
-@app.route('/hosts/<host_name>/', apply=dump_json)
-def list_plugins( host_name):
-    try:
-        return [ '/hosts/%s/%s/'% ( host_name, x) for x in set( x.name
-            for x in Host.objects.get( host_name).plugins.all() ) ]
-    except Host.DoesNotExist:
-        raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
-
-@app.route('/hosts/<host_name>/<plugin>/', apply=dump_json)
-def list_graphs( host_name, plugin):
-    plugin_name, plugin_instance = split( plugin)
-    try:
-        host = Host.objects.get( host_name)
-        if plugin_instance is None:
-            plugins = [ plugin 
-                    for plugin in host.plugins.all()
-                    if plugin.name == plugin_name ]
-        else:
-            plugins = [ host.plugins.get(plugin_name, plugin_instance) ]
-    except Host.DoesNotExist:
-        raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
-    except Plugin.DoesNotExist:
-        plugins = []
-
-    graphes = []
-    for plugin in plugins:
-        graphes.extend( plugin.graphes.all() )
-
-    if len( plugins) > 1:
-        graphes.extend( host.plugins.get( plugin_name, '*').graphes.all() )
-
-    graphes.sort( key=lambda x:( x.plugin.full_name, x.full_name))
-
-    return [ get_url( graph) for graph in graphes ]
-
-@app.route('/sign/', apply=dump_json)
+@app.route('/sign/', apply=DumpInJSON())
 def get_sign():
     urls = bottle.request.GET.getall( 'url')
     urls = ( '/export' + url for url in urls if url.startswith('/graph/') )
@@ -93,22 +46,15 @@ def get_sign():
              for url in urls
             ]
 
-@app.route('/graph/<host_name>/<plugin>/<type>.png')
-@app.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=signature)
+@app.route('/graph/<host_name>/<plugin>/<type>.png', apply=Detect404())
+@app.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=[ signature, Detect404()])
 def show_graph( host_name, plugin, type ):
     plugin_name, plugin_instance = split( plugin)
     type_name, type_instance = split( type)
 
-    try:
-        graph = Host.objects.get( host_name
-                ).plugins.get( plugin_name, plugin_instance
-                ).graphes.get( type_name, type_instance)
-    except Host.DoesNotExist:
-        raise bottle.HTTPError( 404, 'Host %s does not exist' % host_name)
-    except Plugin.DoesNotExist:
-        raise bottle.HTTPError( 404, 'Plugin %s does not exist' % plugin_name)
-    except Graph.DoesNotExist:
-        raise bottle.HTTPError( 404, 'Graph %s does not exist' % plugin_instance)
+    graph = Host.objects.get( host_name
+            ).plugins.get( plugin_name, plugin_instance
+            ).graphes.get( type_name, type_instance)
 
     parameters = bottle.request.GET
     start, end = _resolve_timespan(
