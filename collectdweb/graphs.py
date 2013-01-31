@@ -46,8 +46,11 @@ class RrdCommand( object):
     def __iter__(self):
         try:
             yield self.first
-            for x in self.process.stdout.read():
+            while True:
+                x = self.process.stdout.read(4000)
                 yield x
+                if x == '':
+                    break
         finally:
             self.process.wait()
 
