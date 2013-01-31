@@ -148,7 +148,10 @@
         ),
         listHost: function( host ){
             Backbone.ajax({
-                url: host
+                url: host,
+                data: {
+                    group:'-'
+                }
             }).done( this.gotPlugins.bind( this));
         },
         gotPlugins: function( plugins ) {
