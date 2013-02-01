@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from collectdweb import get_shared
+
 COLLECTD_CONFIG_FILE='/etc/collectd/collection.conf'
-COLLECTD_CONFIG_FILE='/home/cecedille1/rrd/collection.conf'
+GRAPH_DEFINITIONS=get_shared( 'graph_definition')

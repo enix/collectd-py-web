@@ -5,11 +5,10 @@ import settings
 
 from collectdweb.collectd_adapter import Collectd
 from collectdweb.parser import Parser
-from collectdweb import get_shared
 from collections import defaultdict
 
 collectd = Collectd( settings.COLLECTD_CONFIG_FILE)
-GRAPHS = Parser().parse( open( get_shared( 'graph_definition'), 'rb'))
+GRAPHS = Parser().parse( open( settings.GRAPH_DEFINITIONS, 'rb'))
 
 class DoesNotExist(Exception):
     def __init__(self, model, name):

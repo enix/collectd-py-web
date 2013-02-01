@@ -5,7 +5,7 @@ import os
 
 key_files = [
         '/etc/collectd-py-web',
-        os.expanduser('~/.collectd-py-webrc')
+        os.path.expanduser('~/.collectd-py-webrc')
         ]
 
 def get_key():
@@ -15,7 +15,7 @@ def _get_saved_key():
     for key_file in key_files:
         try:
             return open( key_file , 'rb').read()
-        except OSError:
+        except IOError:
             pass
 
 def _gen_and_save_key():
@@ -27,9 +27,11 @@ def _gen_and_save_key():
 def _save(key):
     for key_file in key_files:
         try:
-            os.open( key_file, 'wb', 0600).write( key)
+            with open( key_file, 'wb' ) as file:
+                file.write( key)
+                os.fchmod( file.fileno(), 0600)
             break
-        except OSError:
+        except IOError:
             continue
     else:
         return
