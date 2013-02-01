@@ -549,7 +549,7 @@
             this.views = _.map( graphes, function( url ) {
                 var view = new GraphView({
                     lazy: this._lazyIsSet,
-                    url : url,
+                    url : location.origin + url,
                     start: start,
                     end: end
                 });
