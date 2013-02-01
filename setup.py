@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from setuptools import setup
 
-setup(name='collectd-py-web',
+setup(
+        name='collectd-py-web',
         version='1.0',
         description='Light web interface for Collectd',
         author='eNix',
@@ -22,7 +20,9 @@ setup(name='collectd-py-web',
             'Topic :: Scientific/Engineering :: Information Analysis',
             'Topic :: System :: Monitoring',
             ],
+        include_package_data=True,
         install_requires=[
             'bottle>=0.11',
-            'gevent>=1.0'
-            ])
+            'gevent>0.99'
+            ]
+        )
