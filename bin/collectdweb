@@ -13,10 +13,16 @@ try:
 except ImportError:
     sys.path.append( os.path.join( os.path.dirname( __file__), '..'))
 
+from collectdweb import settings
 from collectdweb.application import app
 
 if not 'nostatics' in sys.argv:
     from collectdweb.statics import app as statics
     app.merge( statics)
 
-app.run( server='gevent', catchall=False)
+DEFAULT_ADDRESS='127.0.0.1'
+DEFAULT_PORT=8080
+app.run(
+        port=getattr(settings, 'PORT', DEFAULT_PORT),
+        host=getattr(settings, 'ADDRESS', DEFAULT_ADDRESS),
+        server='gevent')
