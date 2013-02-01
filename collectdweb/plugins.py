@@ -11,8 +11,6 @@ import bottle
 from collectdweb.models import DoesNotExist
 from collectdweb.patterns import Filters
 
-KEY = 'OP IS A FAG'
-
 class Detect404(object):
     api = 2
     name = 'detect_404'
@@ -83,8 +81,11 @@ class Signature(object):
     api = 2
     name = 'signature'
 
+    def __init__(self, key):
+        self.key = key
+
     def sign(self, path):
-        return hmac.new(KEY, path, hashlib.sha1).hexdigest()
+        return hmac.new( self.key, path, hashlib.sha1).hexdigest()
 
     def reject(self, reason):
         raise bottle.HTTPError(403, reason)

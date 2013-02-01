@@ -6,9 +6,11 @@ import bottle
 from collectdweb.models import Host, Graph
 from collectdweb.plugins import DumpInJSON, Signature, Detect404
 from collectdweb.error import make_image
+from collectdweb.key import get_key
 from collectdweb.web_service import web_service, split
 
-signature = Signature()
+
+signature = Signature( get_key())
 
 SUPPORTED_FORMATS = {
         'pdf': 'application:pdf',
