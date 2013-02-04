@@ -16,9 +16,6 @@ except ImportError:
 from collectdweb import settings
 from collectdweb.application import app
 
-if not 'nostatics' in sys.argv:
-    from collectdweb.statics import app as statics
-    app.merge( statics)
 
 DEFAULT_ADDRESS='127.0.0.1'
 DEFAULT_PORT=8080

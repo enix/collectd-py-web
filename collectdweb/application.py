@@ -8,9 +8,14 @@ from collectdweb.plugins import DumpInJSON, Signature, Detect404
 from collectdweb.error import make_image
 from collectdweb.key import get_key
 from collectdweb.web_service import web_service, split
+from collectdweb.statics import app as statics
 
 
 signature = Signature( get_key())
+
+app = bottle.Bottle()
+app.merge( web_service )
+app.merge( statics)
 
 SUPPORTED_FORMATS = {
         'pdf': 'application:pdf',
@@ -34,10 +39,6 @@ def _resolve_timespan( timespan_name, start, end):
         return start, 'start+%s' % timespan
     else:
         return '-' + str(timespan), ''
-
-
-app = bottle.Bottle()
-app.merge( web_service )
 
 @app.route('/sign/', apply=DumpInJSON())
 def get_sign():
