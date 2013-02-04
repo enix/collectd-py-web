@@ -546,10 +546,12 @@
             var start = addTime( end, -1, 'day');
 
             var container = $('<ul>');
+            var origin = location.protocol + '//' + location.host ;
+
             this.views = _.map( graphes, function( url ) {
                 var view = new GraphView({
                     lazy: this._lazyIsSet,
-                    url : location.origin + url,
+                    url : origin + url,
                     start: start,
                     end: end
                 });
