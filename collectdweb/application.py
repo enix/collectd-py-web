@@ -18,7 +18,7 @@ app.merge( web_service )
 app.merge( statics)
 
 SUPPORTED_FORMATS = {
-        'pdf': 'application:pdf',
+        'pdf': 'application/pdf',
         'eps': 'application/epd', 
         'svg': 'image/svg+xml',
         'png': 'image/png'
