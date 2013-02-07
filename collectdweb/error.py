@@ -10,10 +10,12 @@ try:
     import PIL.Image
     import PIL.ImageDraw
     import PIL.ImageFont
-    import fontconfig
+    try:
+        import fontconfig
+    except ImportError:
+        fontconfig = None
 except ImportError:
     PIL = None
-    fontconfig = None
 
 FONT_FAMILY='DejaVu Sans'
 font = ''
