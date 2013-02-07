@@ -29,14 +29,37 @@ class Library(object):
             out.write( 'ALIAS %s = %s\n'% ( alias, target))
 
 class RrdCommand( object):
-    def __init__(self, args, env=None):
+    def __init__( self, *args):
         command = [ 'rrdtool' ]
         command.extend( args)
-        self.process = subprocess.Popen( command,
-                env=env,
-                stdin=open('/dev/null'),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
+        self.process = subprocess.Popen( command, **self.get_command_kwargs())
+
+    def get_command_kwargs(self):
+        return {
+                'stdin': open('/dev/null'),
+                'stdout': subprocess.PIPE,
+                'stderr': subprocess.PIPE,
+        }
+
+class RrdFetch(RrdCommand):
+    def __init__( self, args):
+        super(RrdFetch, self).__init__( 'fetch', *args)
+
+    def get_command_kwargs( self):
+        kwargs = super( RrdFetch, self).get_command_kwargs()
+        kwargs.update({
+            'env' : {
+                'LC_ALL': 'C'
+                }
+            })
+        return kwargs
+
+    def __iter__(self):
+        return iter( self.process.stdout)
+
+class RrdGraph( RrdCommand):
+    def __init__(self, args):
+        super(RrdGraph, self).__init__( 'graph', '-', *args)
         first = self.first = self.process.stdout.read(3)
         if not first:
             err = self.process.stderr.read()
@@ -85,12 +108,10 @@ class BaseGraph( object):
         return maxes
 
     def _get_max(self, file, start, end):
-        command = RrdCommand([ 'fetch', file, 'AVERAGE',
+        command = RrdFetch([ file, 'AVERAGE',
             '-s', start,
             '-e', end,
-            ], env={
-                'LC_ALL': 'C'
-                })
+            ])
         output = iter( command)
         header = next( output)
         labels = filter( bool, header.strip().split(' '))
@@ -112,8 +133,6 @@ class BaseGraph( object):
     def build( self, title, sources, start, end=None, format=None, upper=None):
         #sources: [ [ plugin, instance, file ] ... ]
         args = [
-                'graph',
-                '-',
                 '-a', format.upper() if format else 'PNG',
                 '-t', title,
                 '-s', start,
@@ -127,7 +146,7 @@ class BaseGraph( object):
         args.extend( self.opts )
         args.extend( self.get_args( [ ( p.replace('.', '-'), i, f) for p, i, f in sources ]))
         
-        graph = RrdCommand(args)
+        graph = RrdGraph(args)
         return graph
 
 class Graph( BaseGraph):
