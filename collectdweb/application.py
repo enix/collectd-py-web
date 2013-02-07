@@ -78,6 +78,8 @@ def show_graph( host_name, plugin, type ):
         image = make_image( 'No Graph definition for %s' % str(e), format)
     except ValueError, e:
         bottle.response.status = 400
+        import traceback
+        traceback.print_exc(e)
         image = make_image( str(e), format)
 
     content_type = SUPPORTED_FORMATS[format]
