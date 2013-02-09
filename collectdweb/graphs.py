@@ -133,7 +133,7 @@ class BaseGraph( object):
     def build( self, title, sources, start, end=None, format=None, upper=None):
         #sources: [ [ plugin, instance, file ] ... ]
         args = [
-                '-a', format.upper() if format else 'PNG',
+                '-a', format.upper() if format and format != 'text' else 'PNG',
                 '-t', title,
                 '-s', start,
                 ]
@@ -145,7 +145,10 @@ class BaseGraph( object):
         args.extend( self.DEFAULT_OPTIONS)
         args.extend( self.opts )
         args.extend( self.get_args( [ ( p.replace('.', '-'), i, f) for p, i, f in sources ]))
-        
+
+        if format == 'text':
+            return '\n'.join(args)
+
         graph = RrdGraph(args)
         return graph
 

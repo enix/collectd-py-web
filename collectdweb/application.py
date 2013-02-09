@@ -21,7 +21,8 @@ SUPPORTED_FORMATS = {
         'pdf': 'application/pdf',
         'eps': 'application/epd', 
         'svg': 'image/svg+xml',
-        'png': 'image/png'
+        'png': 'image/png',
+        'text' : 'text/plain',
         }
 TIMESPANS = {
         'hour': 3600,
