@@ -33,6 +33,7 @@ def get_font():
                     font = PIL.ImageFont.truetype( font.file, 14, encoding='unic')
                     return font
     font=PIL.ImageFont.load_default()
+    return font
 
 def make_image(text,format):
     if PIL is None:
