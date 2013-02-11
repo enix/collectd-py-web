@@ -32,7 +32,15 @@ class PluginManager( object):
     def __init__(self, host):
         self.host = host
     def __iter__(self):
-        return iter( collectd.get_plugins_of([ self.host.name ]))
+        all_the_plugins = collectd.get_plugins_of([ self.host.name ])
+        plugins_count = defaultdict( list)
+        for plugin,instance in all_the_plugins:
+            plugins_count[plugin].append( instance)
+        for plugin, instances in plugins_count.items():
+            if len( instances) > 1:
+                all_the_plugins.add( ( plugin, frozenset(instances)) )
+        return iter( all_the_plugins )
+
     def all(self):
         return [ Plugin( self.host, name, instance ) for name, instance in self ]
     def get(self, plugin, plugin_instance=None):
