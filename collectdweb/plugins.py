@@ -74,7 +74,9 @@ class Urlizer(object):
     def apply(self, callback, route):
         def inner_urlize(**kw):
             all_the_results = callback( **kw)
-            return [ self.pattern.format( r) for r in all_the_results ]
+            all_the_urls =  [ self.pattern.format( r) for r in all_the_results ]
+            all_the_urls.sort()
+            return all_the_urls
         return inner_urlize
 
 class Signature(object):
