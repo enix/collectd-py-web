@@ -8,3 +8,9 @@ GRAPH_DEFINITIONS=get_shared( 'graph_definition')
 
 ADDRESS='0.0.0.0'
 PORT=8080
+
+
+try:
+    from collectdweb.localsettings import *
+except ImportError:
+    pass
