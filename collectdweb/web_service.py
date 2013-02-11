@@ -28,7 +28,7 @@ def list_plugins( host_name):
     return Host.objects.get( host_name).plugins.all()
 
 @web_service.route('/hosts/<host_name>/<plugin>/', apply=[
-    Urlizer( '/graph/{0.plugin.host.full_name}/{0.plugin.full_name}/{0.full_name}.png'),
+    Urlizer( '/hosts/{0.plugin.host.full_name}/{0.plugin.full_name}/{0.full_name}.png'),
     detect_404, filter_list,
     ])
 def list_graphs( host_name, plugin):

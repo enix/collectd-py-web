@@ -44,14 +44,14 @@ def _resolve_timespan( timespan_name, start, end):
 @app.route('/sign/', apply=DumpInJSON())
 def get_sign():
     urls = bottle.request.GET.getall( 'url')
-    urls = ( '/export' + url for url in urls if url.startswith('/graph/') )
+    urls = ( '/export' + url for url in urls if url.startswith('/hosts/') )
     return [
              url + '?sign='+ signature.sign( url)
              for url in urls
             ]
 
-@app.route('/graph/<host_name>/<plugin>/<type>.png', apply=Detect404())
-@app.route('/exports/graph/<host_name>/<plugin>/<type>.png', apply=[ signature, Detect404()])
+@app.route('/hosts/<host_name>/<plugin>/<type>.png', apply=Detect404())
+@app.route('/exports/hosts/<host_name>/<plugin>/<type>.png', apply=[ signature, Detect404()])
 def show_graph( host_name, plugin, type ):
     plugin_name, plugin_instance = split( plugin)
     type_name, type_instance = split( type)
