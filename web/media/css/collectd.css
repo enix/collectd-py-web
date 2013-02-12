@@ -1,4 +1,4 @@
-@import url("/media/css/blueprint/screen.css");
-@import url("/media/css/custom-theme/jquery-ui.css");
-@import url("/media/css/base.css");
+@import url("./blueprint/screen.css");
+@import url("./custom-theme/jquery-ui.css");
+@import url("./base.css");
 
