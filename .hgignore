@@ -6,3 +6,4 @@ venv
 .noseids
 build
 collectdweb/localsettings.py
+collectdweb/share/web
