@@ -1,19 +1,9 @@
-(function(window){
-    var _times = {
-        minute: 60,
-        hour: 60*60,
-        day: 24*60*60,
-        week: 7*24*60*60,
-        month: 31*24*60*60,
-        year: 365.25*24*60*60
-    };
-    var addTime = function( date, interval, timespan) {
-        if ( _.isUndefined( timespan)) {
-            return new Date( date.getTime() + interval);
-        } else {
-            return new Date( date.getTime() + interval * 1000 * _times[timespan] );
-        }
-    };
+define([
+       'Backbone',
+       'Mustache',
+       'addtime'
+], function( Backbone, Mustache, addTime) {
+    "use strict";
     var GraphView = Backbone.View.extend({
         tagName : 'li',
         className : 'gc',
@@ -152,6 +142,5 @@
             }
         }
     });
-    window.addTime = addTime;
-    window.GraphView = GraphView;
-})(this);
+    return GraphView;
+});
