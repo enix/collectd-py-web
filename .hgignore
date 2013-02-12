@@ -5,3 +5,4 @@ venv
 .coverage
 .noseids
 build
+collectdweb/localsettings.py
