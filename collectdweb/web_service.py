@@ -41,12 +41,13 @@ def list_graphs( host_name, plugin):
                     if plugin.name == plugin_name ]
         elif plugin_instance[-1] == '*'  :
             prefix = plugin_instance.rstrip('*')
-            plugins = [ plugin for plugin in host.plugins.all()
-                    if plugin.name == plugin_name ]
             if prefix:
-                plugins = [ plugin for plugin in plugins
-                        if plugin.instance and
+                plugins = [ plugin for plugin in host.plugins.all()
+                        if plugin.name == plugin_name and
+                        plugin.instance and
                         plugin.instance.startswith( prefix) ]
+            else:
+                plugins = [ host.plugins.get(plugin_name, plugin_instance) ]
         else:
             plugins = [ host.plugins.get(plugin_name, plugin_instance) ]
     except Plugin.DoesNotExist:
