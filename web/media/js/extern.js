@@ -1,5 +1,6 @@
 /*jshint browser: true */
-define([
+
+require([
        'jQuery',
        'underscore',
        'graphview'
