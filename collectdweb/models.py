@@ -44,12 +44,11 @@ class PluginManager( object):
     def all(self):
         return [ Plugin( self.host, name, instance ) for name, instance in self ]
     def get(self, plugin, plugin_instance=None):
-        if plugin_instance == '*':
-            instances = [ instance for name,instance in self if name == plugin and plugin_instance ]
-            if instances:
-                return Plugin( self.host, plugin, instances)
-        elif (plugin, plugin_instance) in self:
-            return Plugin( self.host, plugin, plugin_instance)
+        for plugin_, plugin_instance_ in self:
+            if plugin == plugin_ and (
+                    plugin_instance == plugin_instance_ or
+                    plugin_instance == '*' and isinstance( plugin_instance_, frozenset)):
+                return Plugin( self.host, plugin, plugin_instance_)
         raise Plugin.DoesNotExist( Plugin, plugin + (
                 '-' + plugin_instance if plugin_instance else '' ))
 
