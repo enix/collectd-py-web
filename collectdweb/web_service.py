@@ -10,24 +10,24 @@ detect_404 = Detect404()
 filter_list = FilterObjectList()
 dump_json =  DumpInJSON()
 
-web_service = bottle.Bottle( autojson=False)
-web_service.install(dump_json)
+application = bottle.Bottle( autojson=False)
+application.install(dump_json)
 
 def split( name):
     return name.split( '-', 1) if '-' in name else ( name, None)
 
-@web_service.route('/hosts/', apply=[ Urlizer('/hosts/{0.full_name}/'), GroupBy(), filter_list, detect_404, ])
+@application.route('/hosts/', apply=[ Urlizer('/hosts/{0.full_name}/'), GroupBy(), filter_list, detect_404, ])
 def list_hosts():
     return Host.objects.all()
 
-@web_service.route('/hosts/<host_name>/', apply=[
+@application.route('/hosts/<host_name>/', apply=[
     Urlizer('/hosts/{0.host.full_name}/{0.full_name}/'),
     GroupBy('-'),
     filter_list, detect_404 ])
 def list_plugins( host_name):
     return Host.objects.get( host_name).plugins.all()
 
-@web_service.route('/hosts/<host_name>/<plugin>/', apply=[
+@application.route('/hosts/<host_name>/<plugin>/', apply=[
     Urlizer( '/hosts/{0.plugin.host.full_name}/{0.plugin.full_name}/{0.full_name}.png'),
     detect_404, filter_list,
     ])

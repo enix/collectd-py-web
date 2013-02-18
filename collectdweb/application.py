@@ -7,15 +7,11 @@ from collectdweb.models import Host, Graph
 from collectdweb.plugins import DumpInJSON, Signature, Detect404
 from collectdweb.error import make_image
 from collectdweb.key import get_key
-from collectdweb.web_service import web_service, split
-from collectdweb.statics import app as statics
 
 
 signature = Signature( get_key())
 
-app = bottle.Bottle()
-app.merge( web_service )
-app.merge( statics)
+application = bottle.Bottle()
 
 SUPPORTED_FORMATS = {
         'pdf': 'application/pdf',
@@ -32,6 +28,9 @@ TIMESPANS = {
         'year' : 366 * 24 * 3600
         }
 
+def split( name):
+    return name.split( '-', 1) if '-' in name else ( name, None)
+
 def _resolve_timespan( timespan_name, start, end):
     timespan = TIMESPANS.get( timespan_name) or TIMESPANS['hour']
     if start and end:
@@ -41,7 +40,7 @@ def _resolve_timespan( timespan_name, start, end):
     else:
         return '-' + str(timespan), ''
 
-@app.route('/sign/', apply=DumpInJSON())
+@application.route('/sign/', apply=DumpInJSON())
 def get_sign():
     urls = bottle.request.GET.getall( 'url')
     urls = ( '/export' + url for url in urls if url.startswith('/hosts/') )
@@ -50,8 +49,8 @@ def get_sign():
              for url in urls
             ]
 
-@app.route('/hosts/<host_name>/<plugin>/<type>.png', apply=Detect404())
-@app.route('/exports/hosts/<host_name>/<plugin>/<type>.png', apply=[ signature, Detect404()])
+@application.route('/hosts/<host_name>/<plugin>/<type>.png', apply=Detect404())
+@application.route('/exports/hosts/<host_name>/<plugin>/<type>.png', apply=[ signature, Detect404()])
 def show_graph( host_name, plugin, type ):
     plugin_name, plugin_instance = split( plugin)
     type_name, type_instance = split( type)
@@ -88,6 +87,3 @@ def show_graph( host_name, plugin, type ):
 
     return image
 
-if __name__ == '__main__':
-    bottle.debug( True)
-    bottle.run()
