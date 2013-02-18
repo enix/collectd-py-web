@@ -7,3 +7,6 @@ venv
 build
 collectdweb/localsettings.py
 collectdweb/share/web
+docs/_build/
+dist/
+collectd_py_web.egg-info/

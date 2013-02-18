@@ -3,12 +3,18 @@
 
 import os
 
+__all__ = [ 'get_key' ]
+
 key_files = [
         '/etc/collectd-py-web',
         os.path.expanduser('~/.collectd-py-webrc')
         ]
 
 def get_key():
+    """
+    return the secret key for the signature
+    If the key does not exits, it is generated and saved in the HOME dir.
+    """
     return _get_saved_key() or _gen_and_save_key()
 
 def _get_saved_key():

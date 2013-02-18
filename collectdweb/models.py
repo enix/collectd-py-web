@@ -7,10 +7,15 @@ from collectdweb.collectd_adapter import Collectd
 from collectdweb.parser import Parser
 from collections import defaultdict
 
+__all__ = [ 'Graph', 'Plugin', 'Host' ]
+
 collectd = Collectd( settings.COLLECTD_CONFIG_FILE)
 GRAPHS = Parser().parse( open( settings.GRAPH_DEFINITIONS, 'rb'))
 
 class DoesNotExist(Exception):
+    """
+    Exception raised when a model is not found
+    """
     def __init__(self, model, name):
         super( DoesNotExist, self).__init__( name)
         self.model = model
@@ -84,6 +89,16 @@ class GraphManager( object):
         raise Graph.DoesNotExist( Graph, type_)
 
 class Host(object):
+    """
+    A model representing a host 
+    
+    :param name: The name of the host in the rrd file structure.
+
+    .. attribute:: objects
+
+        An instance of :class:`HostManager` which allows access to the :class:`Host` objects.
+    """
+
     objects = HostManager()
     def __init__(self, name):
         self.name = name
@@ -94,6 +109,9 @@ class Host(object):
 
     @property
     def plugins(self):
+        """
+        The list of :class:`Plugin` attached to this instance
+        """
         return PluginManager( self)
 
     class DoesNotExist( DoesNotExist):
@@ -135,6 +153,14 @@ class RRDObject(object):
         return '<%s %s>' % ( self.__class__.__name__, self.full_name) #pragma: nocover
 
 class Plugin(RRDObject):
+    """
+    Model representing a Plugin
+
+    :param host: The :class:`Host` to which this plugin is attached.
+    :param plugin: the plugin name.
+    :param plugin_instance: None, a string or a set of instance.
+
+    """
     def __init__(self, host, plugin, plugin_instance):
         super( Plugin, self).__init__( plugin, plugin_instance)
         self.host = host
@@ -147,12 +173,18 @@ class Plugin(RRDObject):
 
     @property
     def graphes(self):
+        """
+        The list of :class:`Graph` attached to this instance
+        """
         return GraphManager( self)
 
     class DoesNotExist( DoesNotExist):
         pass
 
     def rrd_source(self):
+        """
+        return a list of the directories which contains the rrd files.
+        """
         prefix = self.host.get_path() + '/'
         if not self._is_multiple_files():
             return [ ('', prefix + self.full_name) ]
@@ -174,6 +206,13 @@ class Plugin(RRDObject):
         return not (self == other)
 
 class Graph(RRDObject):
+    """
+    Model representing a Graph
+    
+    :param plugin: The :class:`Plugin` instance to which this plugin is linked.
+    :param string type: The type of graph. Determine the Graph definition.
+    :param type_instance: None, a string or set of string determining related to this graph
+    """
     def __init__(self, plugin, type_, type_instance):
         super( Graph, self).__init__( type_, type_instance)
         self.plugin = plugin
@@ -192,6 +231,9 @@ class Graph(RRDObject):
                 )
 
     def generate(self, start, end, **kw):
+        """
+        Generate the graph from *start* to *end*
+        """
         if not self.graphdef:
             raise self.NoDefinition, self.name
         sources = self.rrd_source()
@@ -207,11 +249,19 @@ class Graph(RRDObject):
         return self.graphdef.build( self.title, sources, start, end, **kw)
 
     def calculate_max(self, start, end):
+        """
+        Determine the max from *start* to *end*
+        """
         if not self.graphdef:
             raise self.NoGraph
         return self.graphdef.get_max( self.rrd_source(), start, end)
 
     def rrd_source(self):
+        """
+        List the files attached to this graph.
+
+        return a list of tuples ( plugin, instance, file )
+        """
         if not self._is_multiple_files():
             return [
                     ( plugin, self.full_name, collectd.get_file( prefix_plugin + '/' + self.full_name + '.rrd'))

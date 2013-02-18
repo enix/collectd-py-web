@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import functools
 import json
 import hashlib
 import hmac
@@ -11,11 +12,20 @@ import bottle
 from collectdweb.models import DoesNotExist
 from collectdweb.patterns import Filters
 
+__all__ = [ 'Detect404', 'DumpInJSON', 'FilterObjectList', 'Urlizer', 'GroupBy', 'Signature' ]
+
 class Detect404(object):
+    """
+    Bottle plugin.
+
+    Execute the callback and catch :exc:`collectdweb.models.DoesNotExist`
+    if one is caught, return a 404 HTTP response.
+    """
     api = 2
     name = 'detect_404'
 
     def apply(self, callback, route):
+        @functools.wraps( callback)
         def inner_detect_404(**kw):
             try:
                 return callback( **kw)
@@ -34,6 +44,9 @@ class FakeModel(object):
         return getattr(self.model, name)
 
 class GroupBy(object):
+    """
+    Bottle plugin to group the result by a common left part up to the grouper
+    """
     api = 2
     name = 'group_by'
 
@@ -41,6 +54,30 @@ class GroupBy(object):
         self.ignored_groupers = frozenset( ignored_groupers) if ignored_groupers else frozenset()
 
     def apply(self, callback, route):
+        """
+        Execute the callback and groups the result by the common part up to a grouper
+
+        :param GET grouper: A character or string to group the result.
+
+        Ex::
+        
+            GET /hosts/docs.enix.org/
+            [
+                "cpu",
+                "interface-lo"
+                "interface-eth0",
+                "memory"
+            ]
+
+            GET /hosts/docs.enix.org/?grouper=-
+            [
+                "cpu",
+                "interface-*",
+                "memory"
+            ]
+
+        """
+        @functools.wraps( callback)
         def inner_group_by(**kw):
             all_the_results = callback( **kw)
             grouper = bottle.request.GET.get('group')
@@ -54,10 +91,18 @@ class GroupBy(object):
 
 
 class FilterObjectList(object):
+    """
+    Bottle plugin to filter objects by one ore more patterns
+    """
     api = 2
     name = 'filter_list'
 
     def apply(self, callback, route):
+        """
+        :param pattern: A pattern to filter the matches.
+            Can be specified many times and used as OR switches
+        """
+        @functools.wraps( callback)
         def inner_filter_list(**kw):
             all_the_results = callback( **kw)
             filter = Filters( bottle.request.GET.getall('pattern'))
@@ -65,6 +110,13 @@ class FilterObjectList(object):
         return inner_filter_list
 
 class Urlizer(object):
+    """
+    Bottle plugin to transform models into urls.
+
+    :param pattern: a pattern to transform the model in a string.
+        The model is {0} 
+    """
+
     api = 2
     name = 'urlizer'
 
@@ -72,6 +124,7 @@ class Urlizer(object):
         self.pattern = pattern
 
     def apply(self, callback, route):
+        @functools.wraps( callback)
         def inner_urlize(**kw):
             all_the_results = callback( **kw)
             all_the_urls =  [ self.pattern.format( r) for r in all_the_results ]
@@ -80,6 +133,9 @@ class Urlizer(object):
         return inner_urlize
 
 class Signature(object):
+    """
+    Bottle plugin to create and check signatures to limit access to some pathes
+    """
     api = 2
     name = 'signature'
 
@@ -87,12 +143,22 @@ class Signature(object):
         self.key = key
 
     def sign(self, path):
+        """
+        Generate a signature for path
+        """
         return hmac.new( self.key, path, hashlib.sha1).hexdigest()
 
     def reject(self, reason):
         raise bottle.HTTPError(403, reason)
 
     def apply(self, callback, route):
+        """
+        :param sign: A signature created by :meth:`sign`
+
+        Authorize the request if the signature match else returns a 403 HTTP response
+        """
+
+        @functools.wraps( callback)
         def inner_signature(**kw):
             sign_ = bottle.request.GET['sign']
             if not sign_:
@@ -106,9 +172,13 @@ class Signature(object):
         return inner_signature
 
 class DumpInJSON( object):
+    """
+    Bottle plugin to dump all the response in JSON
+    """
     api = 2
     name='dump_json'
     def apply(self, callback, route):
+        @functools.wraps( callback)
         def inner( **kw):
             result = callback( **kw)
             if ( result is None or

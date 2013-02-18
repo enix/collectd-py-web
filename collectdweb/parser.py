@@ -3,7 +3,13 @@
 
 from collectdweb.graphs import Graph, MetaGraph, Library
 
+
+__all__ = [ 'Parser', 'SyntaxError' ]
+
 class SyntaxError( Exception):
+    """
+    Exception raised when the parsed file use an incorrect syntax
+    """
     pass
 
 class InStream(object):
@@ -63,6 +69,29 @@ class Context(object):
 
 
 class Parser(object):
+    """
+    Parse a file containing graph definitions
+    by default generate :class:`~collectdweb.graphs.Graph` and :class:`~collectdweb.graphs.MetaGraph`
+
+    :param classes: A dict of keyword pointing to a callable return a :class:`collectdweb.graphs.BaseGraph` subclass
+
+    Syntax of the graph definition is:
+
+    .. productionlist::
+        graph_file: ( graph_definiton | alias_definition+ )
+                  : empty_line
+                  :
+        graph_definiton: graph_class graph_name
+                       : option_line +
+                       : definition_line +
+        option_line: "--" option_name ":" ("option_value") ?
+                   :
+        alias_definition: "ALIAS" alias_name "=" target
+                        :
+        target: A previously defined `graph_name`
+        graph_class: A key of `classes`
+        definition_line: depends on the `graph_class`
+    """
     def __init__(self, classes=None):
         self._library = Library()
         self.classes = classes or {
@@ -71,6 +100,10 @@ class Parser(object):
             }
 
     def parse(self, in_stream):
+        """
+        Parse a file-like object *in_stream* and returns a :class:`collectdweb.graphs.Library` instance
+        with the content of the graphes.
+        """
         stream = InStream(in_stream)
         context = Context( self.classes, self._library )
         try:
@@ -89,6 +122,8 @@ class Parser(object):
         return True
     
     def parse_first_line(self, stream, context):
+        """
+        """
         line = next(stream)
 
         tokens = ( token.strip() for token in line.split() if token.strip())

@@ -1,4 +1,5 @@
 
+.PHONY: docs
 
 all: sdist
 
@@ -14,6 +15,9 @@ collectd.js: optimized
 	cat collectdweb/share/web/media/js/libs/require.js\
  	   	collectdweb/share/web/media/js/extern.js >\
  	   	collectdweb/share/web/media/js/collectd.js 
+
+docs:
+	make -C docs html
 
 clean:
 	@echo no no i clean

@@ -2,7 +2,15 @@
 # -*- coding: utf-8 -*-
 
 
+__all__ = [ 'Filters' ]
+
 class Filters(object):
+    """
+    Set of filters
+
+    :param patterns: a list of filters.
+        An expression match if one of the filters matches.
+    """
     def __init__(self, patterns):
         self.patterns = [ Filter( pattern)
                 for pattern in patterns
@@ -10,6 +18,10 @@ class Filters(object):
                 ]
 
     def match( self, word):
+        """
+        Compare the *word* with the filters.
+        Return True if the word match one of the filters
+        """
         if not self.patterns:
             return True
         for pattern in self.patterns:
@@ -18,6 +30,11 @@ class Filters(object):
         return False
 
 class Filter(object):
+    """
+    A single filter
+
+    :param pattern:A string where '*' means anything
+    """
     def __init__(self, pattern):
         self.pattern = list( self.parse( pattern ))
 
@@ -25,6 +42,9 @@ class Filter(object):
         return '+'.join( map( repr, self.pattern))
 
     def match(self, string):
+        """
+        return True if the string match the pattern
+        """
         start = 0
         for pattern in self.pattern:
             forward = pattern.match( string, start)
@@ -35,6 +55,9 @@ class Filter(object):
         return True
 
     def parse(self, pattern):
+        """
+        Split the pattern into :class:`Pattern` subclasses.
+        """
         tokens = pattern.split('*')
         for start, token, end in zip( xrange(len(tokens)), tokens, xrange( -len(tokens)+1, 1)):
             if end == 0 :
