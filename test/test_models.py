@@ -31,10 +31,6 @@ class TestHosts( unittest.TestCase):
                     Host( 'host3'),
                     ]))
 
-    def test_names(self):
-        self.assertEquals( set(Host.objects.names()),
-                set([ 'host1', 'host2', 'host3' ]))
-
     def test_get(self):
         self.assertEquals( Host.objects.get( 'host1'), Host('host1') )
     def test_get_not(self):
@@ -70,10 +66,11 @@ class TestPlugins( unittest.TestCase):
 
     def test_all_plugins(self):
         self.assertTrue( isinstance( self.host.plugins.all(), list))
-        self.assertEquals( len( self.host.plugins.all()), 5)
+        self.assertEquals( len( self.host.plugins.all()), 6)
         self.assertEquals( set( self.host.plugins.all()), set([
             Plugin( self.host, 'cpu', None),
             Plugin( self.host, 'memory', None),
+            Plugin( self.host, 'interface', frozenset([ 'eth0', 'eth1', 'eth2'])),
             Plugin( self.host, 'interface', 'eth0'),
             Plugin( self.host, 'interface', 'eth1'),
             Plugin( self.host, 'interface', 'eth2'),
@@ -158,17 +155,17 @@ class TestGraph(unittest.TestCase):
 
     def test_rrd_single_instance(self):
         self.assertEquals( Graph( self.irqs, 'irq', '3').rrd_source(),
-                [ ( 'irq-3', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host1/irq/irq-3.rrd') ]
+                [ ('', 'irq-3', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host1/irq/irq-3.rrd') ]
                 )
 
     def test_rrd_source_multi_instance(self):
-        self.assertEquals( Graph( self.memory, 'memory', [ 'free', 'used'] ).rrd_source(), [ [
-                ( 'used', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/memory/memory-used.rrd'),
-                ( 'free', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/memory/memory-free.rrd'),
-                ] ])
+        self.assertEquals( Graph( self.memory, 'memory', [ 'free', 'used'] ).rrd_source(), [
+                ( '', 'used', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/memory/memory-used.rrd'),
+                ( '', 'free', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/memory/memory-free.rrd'),
+                ])
     def test_rrd_source(self):
         self.assertEquals( Graph( self.eth0, 'if_packets', None).rrd_source(),
-                [ ( 'if_packets', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/interface-eth0/if_packets.rrd' ) ]
+                [ ('', 'if_packets', '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host2/interface-eth0/if_packets.rrd' ) ]
         )
 
 

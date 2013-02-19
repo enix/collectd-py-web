@@ -136,8 +136,6 @@ class RRDObject(object):
                 if instance is None or isinstance( instance, basestring)
                 else frozenset( instance))
 
-    def _has_no_instance(self):
-        return self.instance is None
     def _is_single_file(self):
         return isinstance( self.instance, basestring)
     def _is_multiple_files(self):
