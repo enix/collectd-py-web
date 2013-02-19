@@ -3,7 +3,11 @@
 
 from collections import defaultdict
 
-from gevent import subprocess
+try:
+    from gevent import subprocess
+except ImportError:
+    import subprocess
+
 from collectdweb.colors import Color
 from collectdweb import settings
 

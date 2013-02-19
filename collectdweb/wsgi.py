@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-import gevent.monkey
-gevent.monkey.patch_all()
+try:
+    import gevent.monkey
+    gevent.monkey.patch_all()
+except ImportError:
+    pass
 
 from bottle import Bottle
 from collectdweb.application import application as images
