@@ -77,13 +77,19 @@ class Pattern(object):
     def __repr__(self):
         return '%s(%s)' % ( self.__class__.__name__, self.target)
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.target == other.target
+
 class Is(Pattern):
     def match(self, word, start):
         return word == self.target and 1 or 0
 
 class Contains(Pattern):
     def match(self, word, start):
-        return len(self.target) if word.find( self.target, start) != -1 else 0
+        index = word.find( self.target, start)
+        if index == -1:
+            return 0
+        return len(self.target) + index - start
 
 class EndsWith(Pattern):
     def match(self, word, start):
