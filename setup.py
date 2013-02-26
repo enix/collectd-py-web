@@ -23,6 +23,5 @@ setup(
         include_package_data=True,
         install_requires=[
             'bottle>=0.11',
-            'gevent>0.99'
             ]
         )
