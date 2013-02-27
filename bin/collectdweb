@@ -10,6 +10,12 @@ try:
 except ImportError:
     sys.path.append( os.path.join( os.path.dirname( __file__), '..'))
 
+try:
+    import gevent
+    server = 'gevent'
+except ImportError:
+    server = 'wsgiref'
+
 from collectdweb import settings
 from collectdweb.wsgi import application
 
@@ -18,4 +24,4 @@ DEFAULT_PORT=8080
 application.run(
         port=getattr(settings, 'PORT', DEFAULT_PORT),
         host=getattr(settings, 'ADDRESS', DEFAULT_ADDRESS),
-        server='gevent')
+        server=server)
