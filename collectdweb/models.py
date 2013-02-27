@@ -68,7 +68,8 @@ class GraphManager( object):
             graphes[graph].append( instance)
 
         for graph, instances in graphes.items():
-            if GRAPHS.get( graph).list_type_instances:
+            graphdef = GRAPHS.get( graph)
+            if graphdef is not None and graphdef.list_type_instances:
                 for i in instances:
                     yield graph, i
             else:
