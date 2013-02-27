@@ -1,6 +1,6 @@
-==============
-Instatallation
-==============
+============
+Installation
+============
 
 
 Dependencies
@@ -71,7 +71,7 @@ Custom settings
 
 If you need to run collectdweb with custom settings, follow the step 1 and 2
 and instead of installing the archive, extract it.
-Create a local file localsettings.py inside collectdweb and override the settings in it::
+Create a local module :mod:`localsettings.py<collectdweb.localsettings>` inside collectdweb and override the settings in it::
 
     collectdweb/localsettings.py
 

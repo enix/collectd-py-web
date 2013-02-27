@@ -19,7 +19,7 @@ Settings
 
 .. module:: collectdweb.localsettings
 
-:mod:`collectdweb.localsettings` is optional package imported by :mod:`settings`
+:mod:`collectdweb.localsettings` is optional package imported by :mod:`collectdweb.settings`
 to let the user override settings.
 
 
