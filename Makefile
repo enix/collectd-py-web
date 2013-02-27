@@ -20,4 +20,8 @@ docs:
 	make -C docs html
 
 clean:
-	@echo no no i clean
+	-rm -r collectd_py_web.egg-info _build build MANIFEST.in collectdweb/share/web/
+	make -C docs clean
+
+mrproper: clean
+	rm -rf dist/*
