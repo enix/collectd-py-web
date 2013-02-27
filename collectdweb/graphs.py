@@ -292,8 +292,8 @@ class MetaGraph( BaseGraph):
         self.number_format = opts.pop('--number_format', self.default_number_format)
         super( MetaGraph, self).__init__( opts)
         self.types = types
-        self.colors = { instance: Color.from_string( color)
-                for instance, color in colors.items() } if colors else {}
+        self.colors = ( dict( zip( colors.keys(), map( Color.from_string, colors.values())))
+                 if colors else {})
 
     @classmethod
     def load( cls, opts, definitions):
