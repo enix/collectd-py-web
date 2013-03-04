@@ -3,21 +3,22 @@
 
 import unittest
 
+from test import get_fixture
 from collectdweb.collectd_adapter import Collectd
 
 class TestAdapter(unittest.TestCase):
     def setUp(self):
-        self.adapter = Collectd( '/home/cecedille1/enix/collectd-py-web/test/fixtures/collection.conf')
+        self.adapter = Collectd( get_fixture('collection.conf'))
 
     def test_datadirs(self):
         self.assertEquals( self.adapter.datadirs, set([
-            '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1',
-            '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd2',
+            get_fixture('rrd1'),
+            get_fixture('rrd2'),
             ]))
 
     def test_libdir(self):
         self.assertEquals( self.adapter.libdirs, set([
-            '/home/cecedille1/enix/collectd-py-web/test/fixtures/libs',
+            get_fixture('libs'),
             ]))
 
     def test_hosts(self):
@@ -43,25 +44,25 @@ class TestAdapter(unittest.TestCase):
 
     def test_get_file(self):
         filepath = self.adapter.get_file( 'host1/irq/irq-3.rrd')
-        self.assertEquals( filepath, '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd1/host1/irq/irq-3.rrd')
+        self.assertEquals( filepath, get_fixture('rrd1/host1/irq/irq-3.rrd'))
         filepath = self.adapter.get_file( 'host2/interface-eth1/if_packets.rrd')
-        self.assertEquals( filepath, '/home/cecedille1/enix/collectd-py-web/test/fixtures/rrd2/host2/interface-eth1/if_packets.rrd')
+        self.assertEquals( filepath, get_fixture('rrd2/host2/interface-eth1/if_packets.rrd'))
 
 
 class TestAdadpterEdgeCase(unittest.TestCase):
     def test_libdirs(self):
-        self.adapter = Collectd( '/home/cecedille1/enix/collectd-py-web/test/fixtures/collection-wrong.conf')
+        self.adapter = Collectd( get_fixture('collection-wrong.conf'))
         self.assertEquals( self.adapter.libdirs, set())
     def test_datadirs(self):
-        self.adapter = Collectd( '/home/cecedille1/enix/collectd-py-web/test/fixtures/collection-wrong.conf')
+        self.adapter = Collectd( get_fixture('collection-wrong.conf'))
         self.assertEquals( self.adapter.datadirs, set([ '/tmp' ]))
-    
+
     def test_errors(self):
-        self.adapter = Collectd( '/home/cecedille1/enix/collectd-py-web/test/fixtures/collection.conf')
+        self.adapter = Collectd( get_fixture('collection.conf'))
         self.assertEquals( set(self.adapter.get_plugins_of([ 'host3' ])),
                 set())
 
     def test_inexisting_file(self):
-        self.adapter = Collectd( '/home/cecedille1/enix/collectd-py-web/test/fixtures/collection.conf')
+        self.adapter = Collectd( get_fixture('collection.conf'))
         with self.assertRaises( ValueError):
             self.adapter.get_file( 'host1/irq/irq-4.rrd')
