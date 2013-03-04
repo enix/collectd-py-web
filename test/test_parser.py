@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
 import unittest
 from cStringIO import StringIO
 
 from collectdweb.parser import InStream, Parser
+from test import TestCaseAssertRaises
 
 
 class TestInStream(unittest.TestCase):
@@ -94,11 +94,12 @@ class Graph(object):
         self.options = options
         self.definition = definition
 
-class TestParser(unittest.TestCase):
+class TestParser(TestCaseAssertRaises):
     def setUp(self):
         self.parser = Parser( classes={
-            'Graph' : Graph 
+            'Graph' : Graph
             })
+
     def test_parser(self):
         library = self.parser.parse( StringIO('''
         Graph g1

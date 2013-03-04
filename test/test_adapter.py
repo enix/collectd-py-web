@@ -65,6 +65,5 @@ class TestAdapter(unittest.TestCase):
                 set())
 
     def test_inexisting_file(self):
-        with self.assertRaises( ValueError):
-            self.adapter.get_file( 'host1/irq/irq-4.rrd')
+        self.assertRaises( ValueError, self.adapter.get_file, 'host1/irq/irq-4.rrd')
 
