@@ -5,7 +5,7 @@ import unittest
 from cStringIO import StringIO
 
 from collectdweb.parser import InStream, Parser
-from test import TestCaseAssertRaises
+from test import TestCaseCompat
 
 
 class TestInStream(unittest.TestCase):
@@ -94,7 +94,7 @@ class Graph(object):
         self.options = options
         self.definition = definition
 
-class TestParser(TestCaseAssertRaises):
+class TestParser(TestCaseCompat):
     def setUp(self):
         self.parser = Parser( classes={
             'Graph' : Graph

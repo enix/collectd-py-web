@@ -29,7 +29,10 @@ class Collectd( object):
         """
         Load a config file and initialize libdirs and datadirs
         """
-        handle = open( config_file, 'r')
+        try:
+            handle = open( config_file, 'r')
+        except IOError:
+            return cls( [], [])
         lines = (
                 map( str.strip, line.split(':', 1))
                 for line in itertools.imap( str.strip, handle)

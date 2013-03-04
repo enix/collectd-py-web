@@ -21,7 +21,7 @@ class DoesNotExist(Exception):
         self.model = model
 
     def __str__(self):
-        return '%s %s does not exist' % ( self.model.__name__, self.message)
+        return '%s %s does not exist' % ( self.model.__name__, super(DoesNotExist, self).__str__())
 
 class HostManager(object):
     def __iter__(self):
