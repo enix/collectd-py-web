@@ -60,7 +60,7 @@ class GroupBy(object):
         :param GET grouper: A character or string to group the result.
 
         Ex::
-        
+
             GET /hosts/docs.enix.org/
             [
                 "cpu",
@@ -160,12 +160,12 @@ class Signature(object):
 
         @functools.wraps( callback)
         def inner_signature(**kw):
-            sign_ = bottle.request.GET['sign']
-            if not sign_:
+            sign = bottle.request.GET.get('sign')
+            if not sign:
                 return self.reject('Missing signature')
 
             path= bottle.request.environ['PATH_INFO']
-            if sign_ != self.sign(path):
+            if sign != self.sign(path):
                 return self.reject('Bad signature. You bastards!')
 
             return callback( **kw)
