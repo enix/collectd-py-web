@@ -15,22 +15,21 @@ class Collectd( object):
     """
     A collectd server running on this host.
 
-    :param config_file: A collection.conf file of collectd
+    .. attribute:: datadirs
+
+        A list of directories containing a rrd file structure.
     """
-    def __init__(self, config_file):
-        self.filename = config_file
-
+    def __init__(self, datadirs, libdirs=None):
         self._config_loaded = False
-        self._filesystem = None
+        self.datadirs = frozenset( datadirs)
+        self.libdirs = frozenset( libdirs) if libdirs else frozenset()
 
-        self._libdirs = set()
-        self._datadirs = set()
-
-    def load_config_file( self):
+    @classmethod
+    def from_config_file( cls, config_file):
         """
         Load a config file and initialize libdirs and datadirs
         """
-        handle = open( self.filename, 'r')
+        handle = open( config_file, 'r')
         lines = (
                 map( str.strip, line.split(':', 1))
                 for line in itertools.imap( str.strip, handle)
@@ -41,29 +40,13 @@ class Collectd( object):
                 for key, value in lines
                 if key and value[0] == '"' and value[-1] == '"'
                 )
+        datadirs, libdirs = set(), set()
         for key, value in lines:
             if key == 'libdir':
-                if os.path.isdir( value):
-                    self._libdirs.add( value)
+                libdirs.add( value)
             elif key == 'datadir':
-                if os.path.isdir( value):
-                    self._datadirs.add( value)
-        self._loaded = True
-
-    @property
-    def datadirs(self):
-        """
-        A list of directories containing a rrd file structure.
-        """
-        if not self._config_loaded:
-            self.load_config_file()
-        return self._datadirs
-    @property
-    def libdirs(self):
-        if not self._config_loaded:
-            self.load_config_file()
-        self.load_config_file()
-        return self._libdirs
+                datadirs.add( value)
+        return cls( datadirs, libdirs)
 
     def get_inside( self, dirnames):
         for datadir in self.datadirs:

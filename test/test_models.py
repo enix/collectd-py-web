@@ -9,7 +9,10 @@ from collectdweb.collectd_adapter import Collectd
 from collectdweb import models
 from collectdweb.models import Host, Plugin, Graph
 
-models.collectd = Collectd( get_fixture('collection.conf'))
+models.collectd = Collectd([
+    get_fixture('rrd1'),
+    get_fixture('rrd2'),
+    ])
 
 class TestHost(unittest.TestCase):
     def test_equality(self):

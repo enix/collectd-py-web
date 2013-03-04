@@ -9,7 +9,7 @@ from collections import defaultdict
 
 __all__ = [ 'Graph', 'Plugin', 'Host' ]
 
-collectd = Collectd( settings.COLLECTD_CONFIG_FILE)
+collectd = Collectd.from_config_file( settings.COLLECTD_CONFIG_FILE)
 GRAPHS = Parser().parse( open( settings.GRAPH_DEFINITIONS, 'rb'))
 
 class DoesNotExist(Exception):
