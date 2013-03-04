@@ -112,12 +112,11 @@ define([
             var start = addTime( end, -1, 'day');
 
             var container = $('<ul>');
-            var origin = location.protocol + '//' + location.host ;
 
             this.views = _.map( graphes, function( url ) {
                 var view = new GraphView({
                     lazy: this._lazyIsSet,
-                    url : origin + url,
+                    url : url,
                     start: start,
                     end: end
                 });
