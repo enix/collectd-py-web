@@ -15,7 +15,7 @@ if sys.version_info < (2,7):
             self.assertTrue( isinstance( obj, cls))
         def assertRaises( self, exc, *args, **kw):
             if args or kw:
-                return super( TestCaseAssertRaises, self).assertRaises( exc, *args, **kw)
+                return super( TestCaseCompat, self).assertRaises( exc, *args, **kw)
             return AssertRaises( self, exc)
 
     class AssertRaises( object):
@@ -31,5 +31,5 @@ if sys.version_info < (2,7):
 
 
 else:
-    TestCaseAssertRaises = unittest.TestCase
+    TestCaseCompat = unittest.TestCase
 
