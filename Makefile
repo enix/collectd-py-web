@@ -6,15 +6,14 @@ all: sdist
 sdist: js
 	python setup.py sdist
 
-js: optimized collectd.js
+js: optimized extern
 
 optimized:
 	r.js -o web/setup.js
 
-collectd.js: optimized
-	cat collectdweb/share/web/media/js/libs/require.js\
- 	   	collectdweb/share/web/media/js/extern.js >\
- 	   	collectdweb/share/web/media/js/collectd.js 
+extern:
+	r.js -o web/extern.json
+
 
 docs:
 	make -C docs html

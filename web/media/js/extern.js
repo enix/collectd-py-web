@@ -1,6 +1,6 @@
 /*jshint browser: true */
 
-require([
+define([
        'jQuery',
        'underscore',
        'graphview'
@@ -17,7 +17,7 @@ require([
             var target = $(e);
             var src = target.attr(options.attr);
             target.replaceWith( $('<ul>', {
-                'className' : "graph-imgs-container"
+                'class' : "graph-imgs-container"
             }).append( new GraphView({ url: src }).render().el));
         });
     };
@@ -25,3 +25,5 @@ require([
         $(document).ready(refresh);
     }
 });
+
+
