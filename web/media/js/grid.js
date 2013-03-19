@@ -23,6 +23,7 @@ define([
         exportLink: function( view) {
             var views = this._getSelected( view);
             Backbone.ajax({
+                type: 'post',
                 url : '/sign/',
                 data: _.map( views, function( view) {
                     return { name: 'url', value: view.src };
