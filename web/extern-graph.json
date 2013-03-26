@@ -7,9 +7,9 @@
     "skipDirOptimize": false,
     "name" : "libs/almond",
     "include" : [
-        "extern"
+        "extern/graph"
     ],
-    "insertRequire": [ "extern" ],
-    "out": "../collectdweb/share/web/media/js/extern.js",
+    "insertRequire": [ "extern/graph" ],
+    "out": "../collectdweb/share/web/media/js/extern/graph.js",
     "wrap" : true
 }

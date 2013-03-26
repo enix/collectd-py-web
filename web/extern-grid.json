@@ -1,0 +1,15 @@
+{
+    "baseUrl": "./media/js/",
+    "mainConfigFile": "./media/js/config.js",
+    "uglify": {
+        "max_line_length": 500
+    },
+    "skipDirOptimize": false,
+    "name" : "libs/almond",
+    "include" : [
+        "extern/grid"
+    ],
+    "insertRequire": [ "extern/grid" ],
+    "out": "../collectdweb/share/web/media/js/extern/grid.js",
+    "wrap" : true
+}

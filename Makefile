@@ -12,7 +12,8 @@ optimized:
 	r.js -o web/setup.js
 
 extern:
-	r.js -o web/extern.json
+	r.js -o web/extern-graph.json
+	r.js -o web/extern-grid.json
 
 
 docs:
