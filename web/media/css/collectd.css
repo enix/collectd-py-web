@@ -1,4 +1,18 @@
-@import url("./blueprint/screen.css");
-@import url("./custom-theme/jquery-ui.css");
-@import url("./base.css");
+@import url("./bootstrap.css");
+@import url("./status.css");
+@import url("./graph.css");
 
+html, body {
+    height: 100%
+}
+#main {
+    padding-bottom: 50px;
+}
+#holder {
+    min-height: 100%;
+    position: relative;
+}
+#footer {
+    position: absolute;
+    bottom: 0;
+}

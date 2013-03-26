@@ -1,6 +1,7 @@
 @import url("./menu.css");
 
 .graph {
+    margin-top: 20px;
     width: 650px;
     list-style-type: none;
     position: relative;

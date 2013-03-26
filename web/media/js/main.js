@@ -1,51 +1,46 @@
 /*jshint browser: true */
 
 define([
+       'Backbone',
        'jQuery',
+       'underscore',
+       'display',
        'utils',
-       'hosts',
-       'menu',
-       'status',
-       'grid'
-], function( $, utils, HostsView, MenuTabs, StatusBar, GridView) {
+       'hosts'
+], function( Backbone, $, _, Display, utils, HostsView ) {
     "use strict";
 
     var MainView = function() {
+        Display.call( this);
         this.effects = new utils.EffectsView();
-        this.menu = new MenuTabs();
-        this.ruler = new utils.Ruler();
-        this.status = new StatusBar();
-        this.error = new utils.ErrorView();
-        this.grid = new GridView();
         this.hosts = new HostsView();
-
-        this.menu.options.on('change-grid-view', this.grid.setView, this.grid);
-        this.menu.options.on('set-ruler', this.toggleRuler, this);
-        this.menu.options.on('set-lazy', this.grid.setLazy, this.grid);
-
-        this.status.on( 'error', this.error.gotError, this.error);
-        this.status.on( 'set-dates', this.grid.setDates, this.grid);
-        this.status.on( 'change-timespan', this.grid.setTimespan, this.grid);
-
-        this.status.on( 'select-all', this.grid.selectAll, this.grid);
-        this.status.on( 'select-none', this.grid.selectNone, this.grid);
-
-        this.status.on( 'move-all-forward', this.grid.moveAllForward, this.grid);
-        this.status.on( 'move-all-backward', this.grid.moveAllBackward, this.grid);
-        this.status.on( 'zoom-all-in', this.grid.zoomAllIn, this.grid);
-        this.status.on( 'zoom-all-out', this.grid.zoomAllOut, this.grid);
-
+        this.grid.on( 'export', this.export_, this);
+        this.grid.on( 'output', this.output, this);
         this.hosts.on( 'show-graphes', this.grid.displayGraphes, this.grid);
     };
-    MainView.prototype.toggleRuler = function( showRuler ){
-        if ( showRuler) {
-            this.ruler.show();
-        } else {
-            this.ruler.hide();
-        }
+    _.extend( MainView.prototype, Display.prototype);
+    MainView.prototype.export_ = function( urls ) {
+        Backbone.ajax({
+            type: 'post',
+            url : '/sign/',
+            data: _.map( urls, function( url) {
+                return { name: 'url', value: url };
+            })
+        }).done( function(signatures) {
+            var dialog = new utils.ExportDialog({ urls : signatures });
+            $('body').append(dialog.render().el);
+        }.bind(this));
+    };
+    MainView.prototype.output = function( url ) {
+        var dialog = new utils.OutputDialog({ url : url });
+        $('body').append(dialog.render().el);
     };
 
     $(document).ready(function() {
         var main = new MainView();
+        $('#sidebar').append( main.hosts.render().el);
+        $('#content')
+        .append( main.status.render().el)
+        .append( main.grid.render().el);
     });
 });

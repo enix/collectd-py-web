@@ -1,0 +1,13 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Exportable urls of the graphes</h3>
+</div>
+<div class="modal-body">
+    <pre>{{#urls}}{{.}}
+{{/urls}}</pre>
+    <div>
+        {{#urls}}
+        <input type="text" value="{{.}}" /><br />
+        {{/urls}}
+    </div>
+</div>

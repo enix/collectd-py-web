@@ -18,6 +18,7 @@ var require = {
                 return this.Backbone.noConflict();
             }
         },
+        'libs/bootstrap/modals' : [ 'jQuery' ],
         'underscore' : {
             'exports' : '_',
             init: function() {

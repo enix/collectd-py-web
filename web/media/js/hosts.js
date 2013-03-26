@@ -2,8 +2,9 @@ define([
        'Backbone',
        'underscore',
        'jQuery',
-       'Mustache'
-], function( Backbone, _, $, Mustache) {
+       'Mustache',
+       'text!templates/hosts.html'
+], function( Backbone, _, $, Mustache, hostsTemplate) {
     "use strict";
     var getUrlPairs = function( list ) {
         return _.map( list.sort(), function(url) {
@@ -14,6 +15,7 @@ define([
         });
     };
     var HostsView = Backbone.View.extend({
+        className: 'well',
         template : Mustache.compile(
             '{{#hosts}}' +
             '<li>' +
@@ -22,14 +24,14 @@ define([
             '{{/hosts}}'
         ),
         events: {
-            'keyup #host-filter' : 'filter',
+            'keyup .filter' : 'filter',
             'click a': 'selectHost'
         },
+        render: function() {
+            this.$el.append( hostsTemplate);
+            return this;
+        },
         initialize: function() {
-            this.setElement('#hosts');
-            this.plugins = new PluginsView();
-
-            this.plugins.on( 'got-graphes', this.gotGraphes, this);
 
             Backbone.ajax({
                 url : '/hosts/'
@@ -64,7 +66,12 @@ define([
             var host = target.attr('href');
             this.host = host;
 
-            this.plugins.listHost( host);
+            if ( this.plugins) {
+                this.plugins.remove();
+            }
+            this.plugins = new PluginsView({ host : host });
+            this.plugins.on( 'got-graphes', this.gotGraphes, this);
+            this.$el.parent().append( this.plugins.render().el);
             return false;
         },
         gotGraphes: function(graphes) {
@@ -72,30 +79,26 @@ define([
         }
     });
     var PluginsView = Backbone.View.extend({
-        initialize: function() {
-            this.setElement("#plugins");
-        },
-        events: {
-            'click ul li a': 'selectPlugin'
-        },
-        template: Mustache.compile(
-            '<div>' +
-            '<div class="ui-widget-header ui-corner-top"><h3>Available Plugins</h3></div>' +
-            '<div id="plugin-container" class="ui-widget-content ui-corner-bottom  ">' +
-            '<ul>{{#plugins}}' +
-            '<li><a href="{{url}}" >{{name}}</a></li>' +
-            '{{/plugins}}</ul>' +
-            '</div>' +
-            '</div>'
-        ),
-        listHost: function( host ){
+        className: 'well',
+        initialize: function( options ) {
             Backbone.ajax({
-                url: host,
+                url: options.host,
                 data: {
                     group:'-'
                 }
             }).done( this.gotPlugins.bind( this));
         },
+        events: {
+            'click ul li a': 'selectPlugin'
+        },
+        template: Mustache.compile(
+            '<h3>Available Plugins</h3>' +
+            '<div class="plugins">' +
+            '<ul>{{#plugins}}' +
+            '<li><a href="{{url}}" >{{name}}</a></li>' +
+            '{{/plugins}}</ul>' +
+            '</div>'
+        ),
         gotPlugins: function( plugins ) {
             this.$el.empty().append( this.template({ plugins: getUrlPairs( plugins) }));
         },

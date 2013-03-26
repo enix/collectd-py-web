@@ -18,7 +18,10 @@ define([
         },
         export_: function( view) {
             var views = this._getSelected( view);
-            this.trigger('export', views);
+            var urls = _.map( views, function( view) {
+                return view.getImgSrc();
+            });
+            this.trigger('export', urls);
         },
         setView: function( view ) {
             if ( view === 'grid') {
