@@ -10,3 +10,4 @@ collectdweb/share/web
 docs/_build/
 dist/
 collectd_py_web.egg-info/
+.project.vip
