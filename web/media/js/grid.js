@@ -4,33 +4,21 @@ define([
        'Backbone',
        'underscore',
        'jQuery',
-       'Mustache',
-       'utils',
        'addtime',
        'graphview'
-], function( Backbone, _, $, Mustache, utils, addTime, GraphView) {
+], function( Backbone, _, $, addTime, GraphView) {
     "use strict";
     var GridView = Backbone.View.extend({
+        tagName : 'ul',
         initialize: function() {
-            this.setElement( '#graph-container');
             this.selected = [];
-            this.outputDialog = new utils.OutputDialog();
-            this.exportDialog = new utils.ExportDialog();
         },
-        output: function( view ) {
-            this.outputDialog.launch( view.getImgSrc());
+        output: function( view) {
+            this.trigger('output', view.getImgSrc());
         },
-        exportLink: function( view) {
+        export_: function( view) {
             var views = this._getSelected( view);
-            Backbone.ajax({
-                type: 'post',
-                url : '/sign/',
-                data: _.map( views, function( view) {
-                    return { name: 'url', value: view.src };
-                })
-            }).done( function(signatures) {
-                this.exportDialog.launch(signatures);
-            }.bind(this));
+            this.trigger('export', views);
         },
         setView: function( view ) {
             if ( view === 'grid') {
@@ -39,12 +27,6 @@ define([
                 this.$el.removeClass('view-grid');
             }
         },
-        template : Mustache.compile(
-            '<li class="ui-widget graph-image">' +
-            '<ul class="sortable ui-sortable" >' +
-            '</ul>' +
-            '</li>'
-        ),
         setDates: function( start, end) {
             _.each( this.views, function( view){
                 view.setDates( start, end);
@@ -112,8 +94,6 @@ define([
             var end = new Date();
             var start = addTime( end, -1, 'day');
 
-            var container = $('<ul>');
-
             this.views = _.map( graphes, function( url ) {
                 var view = new GraphView({
                     lazy: this._lazyIsSet,
@@ -122,12 +102,13 @@ define([
                     end: end
                 });
                 view.on( 'select', this.select, this);
-                view.on( 'export', this.output, this);
-                view.on( 'export-link', this.exportLink, this);
-                container.append(view.render().el);
+                view.on( 'output', this.output, this);
+                view.on( 'export', this.export_, this);
                 return view;
             }, this);
-            this.$el.empty().append( container);
+            this.$el.empty().append(_.map( this.views, function(v) {
+                return v.render().el;
+            }));
         },
         setLazy: function( isSet ) {
             if ( isSet === this._lazyIsSet) {

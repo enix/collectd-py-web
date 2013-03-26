@@ -1,25 +1,36 @@
 
 define([
        'Backbone',
-       'jQuery'
-], function( Backbone, $) {
+       'jQuery',
+       'text!templates/status.html'
+], function( Backbone, $, template) {
     "use strict";
     var StatusBar = Backbone.View.extend({
+        tagName: 'div',
+        id:'graph-toolbar',
+        className:'btn-toolbar home',
         events: {
-            'click #select-all': 'selectAll',
-            'click #select-none' : 'selectNone',
-            'click #rrdeditor-submit' : 'submitDate',
-            'click .ui-icon-home' : 'showHome',
-            'click #item-pan-zoom' : 'showPanZoom',
-            'click #item-timespan' : 'showTimespan',
-            'click .ts-item': 'selectTimespan',
-            'click .ui-icon-triangle-1-e': 'moveAllForward',
-            'click .ui-icon-triangle-1-w': 'moveAllBackward',
-            'click .ui-icon-zoomin': 'zoomInAll',
-            'click .ui-icon-zoomout': 'zoomOutAll'
+            'click .select-all': 'selectAll',
+            'click .select-none' : 'selectNone',
+            'click .menu-timespn' : 'submitDate',
+            'click .home' : 'showHome',
+            'click .pan-zoom' : 'showPanZoom',
+            'click .timespn' : 'showTimespan',
+            'click .year': 'selectTimespanYear',
+            'click .month': 'selectTimespanMonth',
+            'click .week': 'selectTimespanWeek',
+            'click .day': 'selectTimespanDay',
+            'click .hour': 'selectTimespanHour',
+            'click .forward': 'moveAllForward',
+            'click .backward': 'moveAllBackward',
+            'click .zoomin': 'zoomInAll',
+            'click .zoomout': 'zoomOutAll'
         },
-        initialize: function(){
-            this.setElement('#toolbar-content');
+        render: function() {
+            this.$el.append( template);
+            this.$('.menu-options').hide();
+            this.$('.menu-timespn').hide();
+            return this;
         },
         selectAll: function() {
             this.trigger( 'select-all');
@@ -57,7 +68,7 @@ define([
             return false;
         },
         _showItem : function( item ) {
-            this.$('.toolbar-item').not(item).fadeOut();
+            this.$('.menu-options, .menu-timespn, .menu-pan-zoom').not(item).fadeOut();
             this.$(item).fadeIn();
         },
         showHome: function() {
@@ -65,17 +76,27 @@ define([
             return false;
         },
         showTimespan: function() {
-            this._showItem( '.item-timespan');
+            this._showItem( '.menu-timespn');
             return false;
         },
         showPanZoom: function() {
-            this._showItem( '.item-pan-zoom');
+            this._showItem( '.menu-pan-zoom');
             return false;
         },
-        selectTimespan: function(ev) {
-            var target = $(ev.currentTarget);
-            var timespan = target.attr('title');
-            this.trigger( 'change-timespan', timespan);
+        selectTimespanHour: function(ev) {
+            this.trigger( 'change-timespan', 'hour');
+        },
+        selectTimespanDay: function(ev) {
+            this.trigger( 'change-timespan', 'day');
+        },
+        selectTimespanMonth: function(ev) {
+            this.trigger( 'change-timespan', 'month');
+        },
+        selectTimespanWeek: function(ev) {
+            this.trigger( 'change-timespan', 'week');
+        },
+        selectTimespanYear: function(ev) {
+            this.trigger( 'change-timespan', 'year');
         }
     });
     return StatusBar;

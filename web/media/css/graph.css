@@ -1,0 +1,14 @@
+.graph {
+    width: 650px;
+    list-style-type: none;
+    position: relative;
+}
+.graph.selected {
+    background-color: #F5F5F5;
+}
+.graph .graph-menu {
+    display: none;
+}
+.graph:hover .graph-menu {
+    display: block;
+}

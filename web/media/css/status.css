@@ -1,0 +1,14 @@
+#graph-toolbar {
+    width: 960px;
+    margin: auto;
+}
+#graph-toolbar .menu-pan-zoom {
+    float: right;
+}
+#graph-toolbar .menu-timespn {
+    float: right;
+    margin-bottom: 0;
+}
+#graph-toolbar .menu-timespn input {
+    margin-bottom: 0;
+}

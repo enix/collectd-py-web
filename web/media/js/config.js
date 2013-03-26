@@ -1,6 +1,7 @@
 /*jshint strict: false */
 var require = {
     paths: {
+        'text' : 'libs/require-text',
         'jQuery' : 'libs/jquery',
         'Backbone' : 'libs/backbone',
         'Mustache' : 'libs/mustache',

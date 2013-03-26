@@ -1,23 +1,24 @@
 define([
        'Backbone',
        'Mustache',
-       'addtime'
-], function( Backbone, Mustache, addTime) {
+       'addtime',
+       'text!templates/menu.html'
+], function( Backbone, Mustache, addTime, menuTemplate) {
     "use strict";
     var GraphView = Backbone.View.extend({
         tagName : 'li',
-        className : 'gc',
+        className : 'graph',
         events: {
-            'click .ui-icon-triangle-1-w' : 'moveBackward',
-            'click .ui-icon-triangle-1-e' : 'moveForward',
-            'click .ui-icon-zoomin': 'zoomIn',
-            'click .ui-icon-zoomout': 'zoomOut',
-            'click .ui-icon-close' : 'close',
-            'click .ui-icon-star' : 'toggleSelected',
-            'click .ui-icon-disk' : 'output',
-            'click .ui-icon-bookmark' : 'exportLink',
-            'click .ui-icon-arrowstop-1-n': 'augmentUpper',
-            'click .ui-icon-arrowstop-1-s': 'reduceUpper'
+            'click .backward' : 'moveBackward',
+            'click .forward' : 'moveForward',
+            'click .zoomin': 'zoomIn',
+            'click .zoomout': 'zoomOut',
+            'click .remove' : 'close',
+            'click .select' : 'toggleSelected',
+            'click .output' : 'output',
+            'click .export' : 'export_',
+            'click .upper-up': 'augmentUpper',
+            'click .upper-down': 'reduceUpper'
         },
         initialize : function( opts ) {
             this.lazy = opts.lazy;
@@ -27,23 +28,12 @@ define([
             this.upper = null;
         },
         template: Mustache.compile(
-            '<span class="gc-menu fg-toolbar ui-widget-header ui-corner-all ui-helper-clearfix" >' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-triangle-1-w"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-triangle-1-e"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-zoomin"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-zoomout"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-disk"></span> </span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-star"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-close"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-bookmark"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-arrowstop-1-n"></span></span>' +
-            '<span class="icons ui-state-default ui-corner-all"><span class="ui-icon ui-icon-arrowstop-1-s"></span></span>' +
-            '</span>' +
-            '<span class="selectable"></span>' +
-            '<img class="gc-img" src="{{ url }}" title="{{url}}" />'
+            '<img class="graph-img" src="{{ url }}" title="{{url}}" />'
         ),
         render: function(){
-            this.$el.append( this.template({
+            this.$el
+            .append( menuTemplate)
+            .append( this.template({
                 url: this.lazy ? this.loadingUrl : this.getImgSrc()
             }));
             return this;
@@ -119,9 +109,11 @@ define([
         },
         setSelected: function( selected ) {
             if ( selected ) {
-                this.$('.selectable').addClass('selected');
+                this.$('.select').addClass('active');
+                this.$el.addClass('selected');
             } else {
-                this.$('.selectable').removeClass('selected');
+                this.$('.select').removeClass('active');
+                this.$el.removeClass('selected');
             }
         },
         close: function(){
@@ -129,10 +121,10 @@ define([
             this.remove();
         },
         output: function() {
-            this.trigger( 'export', this);
+            this.trigger( 'output', this);
         },
-        exportLink: function() {
-            this.trigger( 'export-link', this);
+        export_: function() {
+            this.trigger( 'export', this);
         },
         checkLazy: function( windowTop) {
             var elemTop = this.$el.offset().top;
