@@ -60,11 +60,18 @@ def get_sign():
         urls = load_json.get('url') or []
     else:
         urls = bottle.request.POST.getall( 'url')
-    urls = ( '/exports' + url for url in urls if url.startswith('/hosts/') )
-    return [
-             url + '?sign='+ signature.sign( url)
-             for url in urls
-            ]
+
+    signatures = []
+    for url in urls:
+        if not url.startswith('/hosts/'):
+            continue
+        path, interro, query = url.partition('?')
+        to_sign = '/exports' + path
+        sign = signature.sign( to_sign)
+        signatures.append( '{0}?sign={1}{2}'.format(
+                to_sign, sign, interro and ( '&' + query)))
+
+    return signatures
 
 @application.route('/hosts/<host_name>/<plugin>/<type>.png', apply=Detect404())
 @application.route('/exports/hosts/<host_name>/<plugin>/<type>.png', apply=[ signature, Detect404()])

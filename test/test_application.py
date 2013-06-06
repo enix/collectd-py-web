@@ -18,6 +18,16 @@ class TestSignature(unittest.TestCase):
     def tearDown(self):
         self.signature_patch.stop()
 
+    def test_sign_with_query(self):
+        with mock.patch('bottle.request', json = { 'url' : [
+            '/hosts/xen-5/load/load.png?start=123&end=456',
+            ]}):
+            signed = get_sign()
+        self.assertEqual( signed, [
+            '/exports/hosts/xen-5/load/load.png?sign=<sign>&start=123&end=456',
+            ])
+        self.signature.sign.assert_called_once_with( '/exports/hosts/xen-5/load/load.png')
+
     def test_sign_json(self):
         with mock.patch('bottle.request', json = { 'url' : [
             '/hosts/xen-5/load/load.png',
