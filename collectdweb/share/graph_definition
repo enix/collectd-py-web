@@ -1264,9 +1264,9 @@ MetaGraph nfs_procedure
     --number_format: "%5.1lf"
 
 Graph apache_bytes
-    DEF:min_raw={file}:value:MIN
-    DEF:avg_raw={file}:value:AVERAGE
-    DEF:max_raw={file}:value:MAX
+    DEF:min_raw={file}:count:MIN
+    DEF:avg_raw={file}:count:AVERAGE
+    DEF:max_raw={file}:count:MAX
     CDEF:min=min_raw,8,*
     CDEF:avg=avg_raw,8,*
     CDEF:max=max_raw,8,*
