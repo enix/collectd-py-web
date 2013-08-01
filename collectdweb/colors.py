@@ -18,6 +18,11 @@ class Color(object):
     def __str__(self):
         return '#%02hx%02hx%02hx' % tuple( 0xff *x for x in self.rgb)
 
+    def __eq__(self, other):
+        if isinstance(other, basestring):
+            return str(self) == other
+        return isinstance(other, Color) and self.rgb == other.rgb
+
     @classmethod
     def from_string( cls, string):
         """

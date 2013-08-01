@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
         name='collectd-py-web',
-        version='1.0',
+        version='1.1',
         description='Light web interface for Collectd',
         author='eNix',
         author_email='gr@enix.org',

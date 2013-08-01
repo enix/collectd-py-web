@@ -178,7 +178,9 @@ class BaseGraph( object):
             line = line.strip()
             if not line:
                 continue
-            values = map( float, filter( bool, line.split(':',1)[1].split(' ')))
+            time, values = line.split(':', 1)
+            values = values.split(' ')
+            values = (float(value) for value in values if value)
             maxes = [ max(x,y) for x,y in  zip( maxes, values ) ]
         return zip( labels, maxes)
 
@@ -235,13 +237,13 @@ class Graph( BaseGraph):
         super( Graph, self).__init__( opts)
         self.definition = definition
 
-    def file_definition(self):
+    def _file_definition(self):
         """
         Returns the list of the definitions importing a value from the file
         """
         return [ x for x in self.definition if x.startswith('DEF:') ]
 
-    def graph_definition(self):
+    def _graph_definition(self):
         """
         Returns the list of the definitions that do not get a value from a file
         """
@@ -251,9 +253,9 @@ class Graph( BaseGraph):
         args=[]
         if len( sources) == 1:
             a, b, file = sources[0]
-            args.extend([ x.format( file=file) for x in self.file_definition() ])
+            args.extend([ x.format( file=file) for x in self._file_definition() ])
         else:
-            for definition in self.file_definition():
+            for definition in self._file_definition():
                 DEF,name,variable,reduction = definition.split(':')
                 name,file = name.split('=')
                 for plugin, instance_name, file in sources:
@@ -269,7 +271,7 @@ class Graph( BaseGraph):
                     instances=','.join( name+'_'+p+'-'+i for p,i,f in sources ),
                     pluses=','.join( 'ADDNAN' for x in xrange( len( sources) - 1 ))
                     ))
-        args.extend( self.graph_definition())
+        args.extend( self._graph_definition())
         return args
 
 
@@ -319,7 +321,7 @@ class MetaGraph( BaseGraph):
         out.write( '\n')
 
 
-    def sort_sources( self, sources):
+    def _sort_sources( self, sources):
         if not self.types:
             return list( sources)
         else:
@@ -356,7 +358,7 @@ class MetaGraph( BaseGraph):
                         source=instance+ '-' + sources[0] + '_' + dim
                         ))
 
-        instance_names = self.sort_sources( data_sources)
+        instance_names = self._sort_sources( data_sources)
         args.append( 'CDEF:{inst_name}_stk={inst_name}_avg'.format(
             inst_name=instance_names[0]
             ))
