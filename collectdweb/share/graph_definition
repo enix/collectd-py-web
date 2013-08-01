@@ -59,9 +59,9 @@ Graph spam_check
 
 Graph entropy
     --vertical-label : "Bits"
-    DEF:avg={file}:value:AVERAGE
-    DEF:min={file}:value:MIN
-    DEF:max={file}:value:MAX
+    DEF:avg={file}:entropy:AVERAGE
+    DEF:min={file}:entropy:MIN
+    DEF:max={file}:entropy:MAX
     AREA:max#B7B7F7
     AREA:min#FFFFFF
     LINE1:avg#0000FF:Bits
@@ -180,18 +180,17 @@ Graph if_rx_errors
 
 MetaGraph tcp_connections
     --vertical-label : "Connections"
-    --number_format: "{'ESTABLISHED': '00e000', 'SYN_RECV': '00e0a0', 'CLOSING': '000000', 'CLOSE_WAIT': '0000a0', 'FIN_WAIT2': 'f000a0', 'FIN_WAIT1': 'f000f0', 'LAST_ACK': '000080', 'TIME_WAIT': 'ffb000', 'CLOSE': '0000f0', 'SYN_SENT': '00e0ff', 'LISTEN': 'ff0000'}"
-    ESTABLISHED: 
-    SYN_SENT: 
-    SYN_RECV: 
-    FIN_WAIT1: 
-    FIN_WAIT2: 
-    TIME_WAIT: 
-    CLOSE: 
-    CLOSE_WAIT: 
-    LAST_ACK: 
-    CLOSING: 
-    LISTEN: 
+    ESTABLISHED: 00e000
+    SYN_SENT: 00e0ff
+    SYN_RECV: 00e0a0
+    FIN_WAIT1: f000f0
+    FIN_WAIT2: f000a0
+    TIME_WAIT: ffb000
+    CLOSE: 0000f0
+    CLOSE_WAIT: 0000a0
+    LAST_ACK: 000080
+    CLOSING: 000000
+    LISTEN: ff0000
 
 Graph disk_octets
     --vertical-label : "Bytes/s"
@@ -1144,9 +1143,9 @@ Graph vmpage_io
     GPRINT:rpag_avg:LAST:%5.1lf%s Last\l
 
 Graph apache_requests
-    DEF:min={file}:value:MIN
-    DEF:avg={file}:value:AVERAGE
-    DEF:max={file}:value:MAX
+    DEF:min={file}:count:MIN
+    DEF:avg={file}:count:AVERAGE
+    DEF:max={file}:count:MAX
     AREA:max#B7B7F7
     AREA:min#FFFFFF
     LINE1:avg#0000FF:Requests/s
@@ -1428,9 +1427,9 @@ Graph mails
     HRULE:0#000000
 
 Graph apache_scoreboard
-    DEF:min={file}:value:MIN
-    DEF:avg={file}:value:AVERAGE
-    DEF:max={file}:value:MAX
+    DEF:min={file}:count:MIN
+    DEF:avg={file}:count:AVERAGE
+    DEF:max={file}:count:MAX
     AREA:max#B7B7F7
     AREA:min#FFFFFF
     LINE1:avg#0000FF:Processes
@@ -1718,9 +1717,9 @@ Graph response_time
 
 Graph users
     --vertical-label : "Users"
-    DEF:users_avg={file}:value:AVERAGE
-    DEF:users_min={file}:value:MIN
-    DEF:users_max={file}:value:MAX
+    DEF:users_avg={file}:users:AVERAGE
+    DEF:users_min={file}:users:MIN
+    DEF:users_max={file}:users:MAX
     AREA:users_max#B7B7F7
     AREA:users_min#FFFFFF
     LINE1:users_avg#0000FF:Users
